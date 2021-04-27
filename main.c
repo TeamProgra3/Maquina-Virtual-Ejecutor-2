@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "operaciones.h"
 #include "string.h"
-
+void magia();
 void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
     int aux,topA,topB;
 
@@ -115,7 +115,7 @@ void creaArch(){
 }
 
 int main(int cantArg,char* argsMain[]){
-
+    magia();
     int REG[16] = {0};//16 registros (IP, AC, AX,BX...etc)
     int RAM[4096];//4096 celdas de 4 bytes
     mnemonicos();
@@ -138,3 +138,8 @@ int main(int cantArg,char* argsMain[]){
     return 0;
 }
 
+
+
+void magia(){
+    printf("-----------------------VERSION 1.2------------------------\n");
+}
