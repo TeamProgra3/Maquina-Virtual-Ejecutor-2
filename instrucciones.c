@@ -61,7 +61,6 @@ void mnemonicos() {
     MNEM[0xFF1]="STOP";
 }
 
-
 void cargarCC(int *a,int REG[]) {
     if(*a==0)
         REG[CC]=0x00000001;//0b00000000000000000000000000000001
@@ -149,11 +148,9 @@ void RecuperaString(int cod, char salida[50]) {
             op1 = (cod >> 12) & 0xFFF;
             op1 = op1 << 20;
             op1 = op1 >> 20;
-
             op2 = cod & 0xFFF;
             op2 = op2 << 20;
             op2 = op2 >> 20;
-
             if (tipoOp2 == 2)
                 sprintf(aux2, " [%d] ", op2);
             else if (tipoOp2 == 1)
@@ -173,7 +170,6 @@ void RecuperaString(int cod, char salida[50]) {
                 sprintf(aux1, " AC");
         else
             sprintf(aux1, " %d ", op1);
-
         strcat(salida, aux1);
         if (existeOp2)
             strcat(salida, aux2);
@@ -181,9 +177,7 @@ void RecuperaString(int cod, char salida[50]) {
         codaux = (cod >> 20) & 0xFFF;
         strcpy(salida, MNEM[codaux]);
     }
-
 }
-
 int anytoint(char *s, char **out) {
     char *BASES = {"********@*#*****%"};
     int base = 10;
@@ -194,18 +188,15 @@ int anytoint(char *s, char **out) {
     }
     return strtol(s, out, base);
 }
-
 void SYS(int *a,int *b,int REG[],int RAM[]) {
     int i=0;
     char aux;
-
     switch(*a) {
     case 1:
        //arranco en DX+SD (segmento de datos)
         if (((REG[AX]>>8) &0x1 ) == 0x1){
             if (!((REG[AX]>>11) == 0x1))
                 printf("\n[%04i]:",REG[DX]+i);
-
         scanf(" %c",&aux);
         while (aux != '\n'){
             RAM[REG[DS] +REG[DX]+i] = aux;
@@ -264,7 +255,6 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
     int i,j=0;
     char salida[50] = {' '};
     printf("\n");
-    //printf("REG[IP]:%i\n",REG[IP]);
     if (REG[IP]<REG[DS]) {
            system("cls");
         if(REG[IP]<5)
@@ -278,7 +268,6 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
             }
         //printeo la actual con >
         RecuperaString(RAM[REG[IP]],salida);
-
         printf(">[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
         i  = REG[IP];
         if(REG[DS]-i>5)
@@ -298,8 +287,6 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
         barrab(RAM,REG);
     }
 }
-
-
 void barrab(int RAM[],int REG[]) {
 
     int d1,d2;
@@ -309,7 +296,6 @@ void barrab(int RAM[],int REG[]) {
     printf("\n[%04i] cmd:",REG[IP]);
     fflush(stdin);
     gets(c);
-
     if(!strcmp(c,"\0"))
         sysactivado=0;
     else if(!strcmp(c,("p")))
@@ -318,34 +304,25 @@ void barrab(int RAM[],int REG[]) {
         while(strcmp(c,"\0") && strcmp(c,"p")){
             j=0;
             while(c[j]!='\0'&&c[j]!=' ') {
-                aux[j]=c[j];                 //guardo en aux el primer decimal
-                j++;
+                aux[j]=c[j++];                 //guardo en aux el primer decimal
             }
             aux[j] = '\0';
-
             d1=anytoint(aux,NULL);
             if(c[j]=='\0')
                 printf("[%04i]: %i\n",d1,RAM[d1+REG[DS]]); //estoy en el caso donde el usuario ingreso UN SOLO DECIMAL
             else {
                 k=0;
                 while(c[j]!='\0') {
-                    aux[k]=c[j];                 //guardo en aux el segundo decimal
-                    j++;
-                    k++;
+                    aux[k++]=c[j++];                 //guardo en aux el segundo decimal
                 }
                 d2=anytoint(aux,NULL);
                 for(j=d1; j<=d2; j++)
-
                     printf("[%04i]: %i\n",j,RAM[j+REG[DS]]);
             }
             printf("\n[%04i] cmd:",REG[IP]);gets(c);
         }
     }
 }
-
-
-
-
 void JMP(int *a,int *b,int REG[],int RAM[]) {
 
     REG[IP]=(*a)-1; //REG[IP] se incrementa +1 al terminar la instruccion
@@ -355,23 +332,18 @@ void JP(int *a,int *b,int REG[],int RAM[]) {
     if (((REG[CC]>>31&0b1) ==0b0) && (REG[CC]&0b1) ==0b0)
         REG[IP]=*a-1;
 }
-
-
 void JN(int *a,int *b,int REG[],int RAM[]) {
     if (((REG[CC]>>31&0b1) ==0b1) && (REG[CC]&0b1) ==0b0)
         REG[IP]=*a-1;
 }
-
 void JZ(int *a,int *b,int REG[],int RAM[]) {
     if( ((REG[CC])&0b1)==0b1)
         REG[IP]=*a-1;
 }
-
 void JNZ(int *a,int *b,int REG[],int RAM[]) {
     if( ((REG[CC])&0b1)==0b0)
         REG[IP]=*a-1;
 }
-
 void JNP(int *a,int *b,int REG[],int RAM[]) {
     if (!((REG[CC]>>31&0b1)==0b0) || (REG[CC]&0b1) ==0b1)
         REG[IP]=*a-1;
@@ -403,34 +375,3 @@ void NOT(int *a,int *b,int REG[],int RAM[]) {
 void STOP(int *a,int *b,int REG[],int RAM[]) {
     REG[IP]=REG[DS];
 }
-
-/*ANTIGUO CODIGO PARA LEER LAS INSTRUCCIONES DESDE UN .TXT
-
-
-void cargainstruccion(instruccion v[]){
-
-    FILE *arch;
-    int aux,i=0;
-    char c,instr[5];
-
-    arch=fopen("instrucciones.txt","rt");
-    while(!feof(arch)){
-
-        fscanf(arch,"%c",&c);
-        aux=0;
-        while(c!=' '){
-            instr[aux]=c;
-            fscanf(arch,"%c",&c);
-            aux++;
-        }
-        instr[aux]='\0';
-
-        strcpy(v[i].inst,instr);
-        //printf("%s",v[i].inst);
-        fscanf(arch,"%i%i",&v[i].codigo,&v[i].operandos);
-        //printf(" %x\t%i",v[i].codigo,v[i].operandos);
-        i++;
-    }
-    fclose(arch);
-}
-*/

@@ -12,7 +12,7 @@
 
 int sysactivado;
 int cod;
-//char *args[6];
+
 int flagb;
 int flagc;
 int flagd;
@@ -59,16 +59,3 @@ void NOT(int *a,int *b,int REG[],int RAM[]);
 //Instruccion sin operando
 
 void STOP(int *a,int *b,int REG[],int RAM[]);
-
-/* Antigua funcion para cargar vector de instrucciones:
-
-typedef struct{
-    char inst[5];
-    int codigo;
-    int operandos;
-}instruccion;
-
-void cargainstruccion(instruccion v[]);
-
-*/
-

@@ -31,14 +31,12 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 *opA = &RAM[REG[DS]+**opA];
                 break;
             }
-
         }else{                     // DOS OPERANDOS
             cod = var>>28 & 0xF;
             topA = (var>>26) & 0x3;
             topB = (var>>24) & 0x3;
             switch (topA){
             case 0x0 :         //opA: TIPO INMEDIATO
-
                 **opA = (var>>12) & 0xFFF;
                 **opA=**opA<<20;
                 **opA=**opA>>20;
@@ -92,15 +90,10 @@ void Ejecucion(int RAM[], int REG[]){
     }
     free(auxA);free(auxB);
 }
-
 void leeArch(char nombreArch[50],int RAM[],int REG[]){
     int aux;FILE*arch;
     REG[DS] = 0;
-
-    arch = fopen(nombreArch,"rb");
-    //arch = fopen("E:/Programas/Github/maquinavirtual/maquina-virtual-compilador/ejemplodos.bin","rb");
-
-
+    arch = fopen(nombreArch,"rb"); 
     if (arch != NULL){
         while (fread(&aux,sizeof(int),1,arch)==1){
             RAM[REG[DS]] = aux;
@@ -111,9 +104,6 @@ void leeArch(char nombreArch[50],int RAM[],int REG[]){
     }else
         printf("ERROR: Archivo no encontrado");
 }
-
-
-
 void creaArch(){
     FILE*arch;
     arch = fopen("arch.bin","wb");
@@ -124,32 +114,21 @@ void creaArch(){
     fclose(arch);
 }
 
-
-
-
 int main(int cantArg,char* argsMain[]){
 
     int REG[16] = {0};//16 registros (IP, AC, AX,BX...etc)
     int RAM[4096];//4096 celdas de 4 bytes
     mnemonicos();
-    //Toma el archivo que se manda como parametro para ejecutar
-
     flagb=flagc=flagd=0;
     if ((cantArg >=3 && !strcmp(argsMain[2],"-b")) || ((cantArg >=4 && !strcmp(argsMain[3],"-b"))) || (cantArg >=5 && !strcmp(argsMain[4],"-b")))
         flagb= 1;
-
     if ((cantArg >=3 && !strcmp(argsMain[2],"-c")) || ((cantArg >=4 && !strcmp(argsMain[3],"-c"))) || (cantArg >=5 && !strcmp(argsMain[4],"-c"))){
         flagc= 1;
         system("cls");
     }
-
     if ((cantArg >=3 && !strcmp(argsMain[2],"-d")) || ((cantArg >=4 && !strcmp(argsMain[3],"-d"))) || (cantArg >=5 && !strcmp(argsMain[4],"-d"))){
         flagd= 1;
     }
-
-
-
-
     if (cantArg >= 2) {
         leeArch(argsMain[1], RAM, REG);
     } else {
