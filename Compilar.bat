@@ -1,0 +1,1 @@
+gcc main.c instrucciones.c -o main.exe

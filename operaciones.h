@@ -9,10 +9,8 @@
 #define CX 12
 #define DX 13
 
-
 int sysactivado;
 int cod;
-
 int flagb;
 int flagc;
 int flagd;
