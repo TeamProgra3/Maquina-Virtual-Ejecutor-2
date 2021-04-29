@@ -93,7 +93,7 @@ void Ejecucion(int RAM[], int REG[]){
 void leeArch(char nombreArch[50],int RAM[],int REG[]){
     int aux;FILE*arch;
     REG[DS] = 0;
-    arch = fopen(nombreArch,"rb"); 
+    arch = fopen(nombreArch,"rb");
     if (arch != NULL){
         while (fread(&aux,sizeof(int),1,arch)==1){
             RAM[REG[DS]] = aux;
@@ -117,7 +117,7 @@ void creaArch(){
 int main(int cantArg,char* argsMain[]){
     magia();
     int REG[16] = {0};//16 registros (IP, AC, AX,BX...etc)
-    int RAM[4096];//4096 celdas de 4 bytes
+    int RAM[8191];//8192 celdas de 4 bytes
     mnemonicos();
     flagb=flagc=flagd=0;
     if ((cantArg >=3 && !strcmp(argsMain[2],"-b")) || ((cantArg >=4 && !strcmp(argsMain[3],"-b"))) || (cantArg >=5 && !strcmp(argsMain[4],"-b")))

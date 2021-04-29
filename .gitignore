@@ -355,3 +355,4 @@ MigrationBackup/
 .asm
 .cbp
 .depend
+.layout

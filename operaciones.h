@@ -1,7 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define DS 0
+#define SS 1
+#define ES 2
+#define CS 3
+#define HP 4
 #define IP 5
+#define SP 6
+#define BP 7
 #define CC 8
 #define AC 9
 #define AX 10
