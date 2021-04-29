@@ -29,6 +29,7 @@ void muestra(int *a,int *b,int REG[],int RAM[]);
 void barrab(int RAM[],int REG[]);
 void RecuperaString(int cod, char salida[50]);
 int anytoint(char *s, char **out);
+void cargaHL(int *a,int H,int L );
 
 //Instrucciones con dos operandos
 
