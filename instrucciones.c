@@ -250,22 +250,25 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         if(REG[HP]==0xFFFFFFFF){
             for(i=0;i<=REG[ES]>>16;i++)
                 Eseg[i]=(REG[ES]&0x0000FFFF)+i;
-            RAM[ Eseg[0] ]&=0x0000;
-            RAM[ Eseg[0] ]>>16 = (REG[ES]>>16)-1;//pongo en la parte alta de ES[0] el tamaño del extra segment -1
+            cargaHL(&RAM[ Eseg[0] ],(REG[ES]>>16)-1,0x0000);//pongo en la parte alta de ES[0] el tamaño del extra segment -1
             REG[HP]=0x0000FFFF;//HPH=0;HPL=-1
         }
         if( (REG[HP]&0xFFFF)==0xFFFF){ //Si la lista de ocupados esta vacia
-            RAM[ Eseg[REG[CX]+1] ]=Eseg[REG[CX]+1];
-            RAM[ Eseg[REG[CX]+1] ]>>16=(RAM[Eseg[0]]>>16)-REG[CX]-1;
-            RAM[Eseg[0]]>>16=REG[CX];//Ya tiene su puntero a su mismo
-            REG[HP]=0x0000;//HPL=0
-            REG[HP]>>16=REG[CX]+1;//HPH=REG[CX]+1
+
+            cargaHL(&RAM[ Eseg[REG[CX]+1] ],(RAM[Eseg[0]]>>16)-REG[CX]-1,Eseg[REG[CX]+1]);
+            //RAM[ Eseg[REG[CX]+1] ]      parte baja->  Eseg[REG[CX]+1];
+            //RAM[ Eseg[REG[CX]+1] ]>>16  parte alta->  (RAM[Eseg[0]]>>16)-REG[CX]-1;
+            cargaHL(&RAM[Eseg[0]],REG[CX],0x0000);
+            //RAM[Eseg[0]]>>16            parte alta-> REG[CX];
+            cargaHL(&REG[HP],REG[CX]+1,0x0000);
+            //REG[HP]                     parte baja->0x0000;//HPL=0
+            //REG[HP]>>16                 parte alta->REG[CX]+1;//HPH=REG[CX]+1
             REG[DX]=(REG[HP]&0xFFFF)+1;
-        }else{
-            //Mayor al ultimo
+        }/*else{
+            Mayor al ultimo
             }else{
-                //Recorrido ordenado
-            }
+                Recorrido ordenado
+            }*/
 
         break;
     case 6: //libera la memoria indicada en DX
@@ -358,6 +361,13 @@ void barrab(int RAM[],int REG[]) {
         }
     }
 }
+
+void cargaHL(int *a,int H,int L ) {// H=High L=Low
+    int aux;
+	aux=(H<<16)&(0xFFFF0000);
+	*a=aux+L;
+}
+
 void JMP(int *a,int *b,int REG[],int RAM[]) {
 
     REG[IP]=(*a)-1; //REG[IP] se incrementa +1 al terminar la instruccion
