@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include<windows.h>
+#include <windows.h>
 #include "operaciones.h"
 
 //Si hay tiempo estaria piola meter ambos vectores en uno solo
@@ -191,6 +191,8 @@ int anytoint(char *s, char **out) {
 void SYS(int *a,int *b,int REG[],int RAM[]) {
     int i=0;
     char aux;
+    int Eseg[ REG[ES]>>16 ];
+
     switch(*a) {
     case 1:
        //arranco en DX+SD (segmento de datos)
@@ -223,20 +225,53 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         }
         break;
     case 2:
-        for( i=0; i<=REG[12]-1; i++) {
-            if (!((REG[10]>>11)&0xF))            //veifica %800
-                printf("[%04i]:",REG[13]+i);
-            if (REG[10]&0x1)
-                printf("%i ",RAM[REG[0]+REG[13]+i]);
-            if (REG[10]&0x4)
-                printf("%o ",RAM[REG[0]+REG[13]+i]);
-            if (REG[10]&0x8)
-                printf("%x ",RAM[REG[0]+REG[13]+i]);
-            if (REG[10]&0x10)
-                printf("%c ",(char)RAM[REG[0]+REG[13]+i]);
-            if (!((REG[10]>>8)&0x1))
+        for( i=0; i<=REG[CX]-1; i++) {
+            if (!((REG[AX]>>11)&0xF))            //veifica %800
+                printf("[%04i]:",REG[DX]+i);
+            if (REG[AX]&0x1)
+                printf("%i ",RAM[REG[DS]+REG[DX]+i]);
+            if (REG[AX]&0x4)
+                printf("%o ",RAM[REG[DS]+REG[DX]+i]);
+            if (REG[AX]&0x8)
+                printf("%x ",RAM[REG[DS]+REG[DX]+i]);
+            if (REG[AX]&0x10)
+                printf("%c ",(char)RAM[REG[DS]+REG[DX]+i]);
+            if (!((REG[AX]>>8)&0x1))
                 printf("\n");
         }
+        break;
+    case 3: //(STRING READ)
+        break;
+    case 4: //(STRING WRITE)
+        break;
+    case 5: //Requiere en CX la cantidad de celdas que se solicitan y devuelve en DX un puntero a la primer celda para su uso dentro de ES
+        //int ESeg[ REG[ES]>>16 ];
+        //Inicializo listas, segmento extra y posiciono la RAM
+        if(REG[HP]==0xFFFFFFFF){
+            for(i=0;i<=REG[ES]>>16;i++)
+                Eseg[i]=(REG[ES]&0x0000FFFF)+i;
+            RAM[ Eseg[0] ]&=0x0000;
+            RAM[ Eseg[0] ]>>16 = (REG[ES]>>16)-1;//pongo en la parte alta de ES[0] el tamaño del extra segment -1
+            REG[HP]=0x0000FFFF;//HPH=0;HPL=-1
+        }
+        if( (REG[HP]&0xFFFF)==0xFFFF){ //Si la lista de ocupados esta vacia
+            RAM[ Eseg[REG[CX]+1] ]=Eseg[REG[CX]+1];
+            RAM[ Eseg[REG[CX]+1] ]>>16=(RAM[Eseg[0]]>>16)-REG[CX]-1;
+            RAM[Eseg[0]]>>16=REG[CX];//Ya tiene su puntero a su mismo
+            REG[HP]=0x0000;//HPL=0
+            REG[HP]>>16=REG[CX]+1;//HPH=REG[CX]+1
+            REG[DX]=(REG[HP]&0xFFFF)+1;
+        }else{
+            //Mayor al ultimo
+            }else{
+                //Recorrido ordenado
+            }
+
+        break;
+    case 6: //libera la memoria indicada en DX
+        break;
+    case 7:
+        system("cls");
         break;
     case 15:
         if (flagb) {
