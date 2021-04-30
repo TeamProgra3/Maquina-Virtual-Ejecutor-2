@@ -250,7 +250,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         if(REG[HP]==0xFFFFFFFF){
             for(i=0;i<=REG[ES]>>16;i++)
                 Eseg[i]=(REG[ES]&0x0000FFFF)+i;
-            cargaHL(&RAM[ Eseg[0] ],(REG[ES]>>16)-1,0x0000);//pongo en la parte alta de ES[0] el tamaño del extra segment -1
+            cargaHL(&RAM[ Eseg[0] ],(REG[ES]>>16)-1,0x0000);//pongo en la parte alta de ES[0] el tamaï¿½o del extra segment -1
             REG[HP]=0x0000FFFF;//HPH=0;HPL=-1
         }
         if( (REG[HP]&0xFFFF)==0xFFFF){ //Si la lista de ocupados esta vacia
@@ -342,7 +342,8 @@ void barrab(int RAM[],int REG[]) {
         while(strcmp(c,"\0") && strcmp(c,"p")){
             j=0;
             while(c[j]!='\0'&&c[j]!=' ') {
-                aux[j]=c[j++];                 //guardo en aux el primer decimal
+                aux[j]=c[j];
+                j++;  //guardo en aux el primer decimal
             }
             aux[j] = '\0';
             d1=anytoint(aux,NULL);
@@ -351,7 +352,10 @@ void barrab(int RAM[],int REG[]) {
             else {
                 k=0;
                 while(c[j]!='\0') {
-                    aux[k++]=c[j++];                 //guardo en aux el segundo decimal
+                    //aux[k++]=c[j++]; 
+                    aux[k]=c[j];                 //guardo en aux el segundo decimal
+                    j++;
+                    k++;                //guardo en aux el segundo decimal
                 }
                 d2=anytoint(aux,NULL);
                 for(j=d1; j<=d2; j++)
