@@ -30,6 +30,10 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 **opA = var & 0xFFFF;
                 *opA = &RAM[REG[DS]+**opA];
                 break;
+            case 0x3 :    //TIPO INDIRECTO - UN SOLO OPERANDO
+                //ACÁ VA EL CODIGO 
+                //DEL OPERANDO INDIRECTO
+                break;
             }
         }else{                     // DOS OPERANDOS
             cod = var>>28 & 0xF;
@@ -51,7 +55,12 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 **opA = (var>>12) & 0x00FFF;
                 *opA = &RAM[REG[DS]+**opA];
                 break;
+            case 0x3 :    //TIPO INDIRECTO - UN SOLO OPERANDO
+                //ACÁ VA EL CODIGO 
+                //DEL OPERANDO INDIRECTO
+                break;
             }
+            
 
             switch (topB){
             case 0x0 :                      //opB: TIPO INMEDIATO
@@ -68,6 +77,10 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
             case 0x2 :                      //opB: TIPO INMEDIATO
                 **opB = var & 0xFFF;
                 *opB = &RAM[REG[DS]+**opB];
+                break;
+            case 0x3 :    //TIPO INDIRECTO - UN SOLO OPERANDO
+                //ACÁ VA EL CODIGO 
+                //DEL OPERANDO INDIRECTO
                 break;
             }
         }
@@ -91,16 +104,37 @@ void Ejecucion(int RAM[], int REG[]){
     free(auxA);free(auxB);
 }
 void leeArch(char nombreArch[50],int RAM[],int REG[]){
-    int aux;FILE*arch;
+    int cont,aux;FILE*arch;
+    int tamanoDS, tamanoES, tamanoSS,tamanoCS;
     REG[DS] = 0;
     arch = fopen(nombreArch,"rb");
     if (arch != NULL){
-        while (fread(&aux,sizeof(int),1,arch)==1){
-            RAM[REG[DS]] = aux;
-            (REG[DS])++;
+        fread(&aux, sizeof(int), 1, arch);
+        if (aux == 0x4D563231){
+            fread(&tamanoDS, sizeof(int), 1, arch);
+            fread(&tamanoES, sizeof(int), 1, arch);
+            fread(&tamanoSS, sizeof(int), 1, arch);
+            fread(&tamanoCS, sizeof(int), 1, arch);
+
+            if (tamanoES+tamanoCS+tamanoDS+tamanoSS<=8192){
+                REG[CS] = tamanoCS << 4;  //
+                REG[DS] = tamanoDS << 4 || (tamanoCS); 
+                REG[ES] = tamanoES << 4 || (tamanoCS+tamanoDS);
+                REG[ES] = tamanoSS << 4 || (tamanoES+tamanoCS+tamanoDS);
+                cont = 0;
+                while (fread(&aux,sizeof(int),1,arch)==1){ //Carga instrucciones y constantes string en CS
+                    RAM[cont] = aux;
+                    cont++;
+                }
+                if(cont<=tamanoCS)
+                    Ejecucion(RAM, REG);
+                else
+                    printf("OVERFLOW [CS]: La cantidad de instrucciones supera las establecidas como maximo en el header\n");
+                }
         }
+        else 
+            printf("La cabecera del archivo no es valida (Se esperaba MV21)\n");
         fclose(arch);
-        Ejecucion(RAM,REG);
     }else
         printf("ERROR: Archivo no encontrado");
 }
@@ -117,7 +151,8 @@ void creaArch(){
 int main(int cantArg,char* argsMain[]){
     magia();
     int REG[16] = {0};//16 registros (IP, AC, AX,BX...etc)
-    int RAM[8191];//8192 celdas de 4 bytes
+    REG[4] = -1;
+    int RAM[8192];//8192 celdas de 4 bytes
     mnemonicos();
     flagb=flagc=flagd=0;
     if ((cantArg >=3 && !strcmp(argsMain[2],"-b")) || ((cantArg >=4 && !strcmp(argsMain[3],"-b"))) || (cantArg >=5 && !strcmp(argsMain[4],"-b")))
@@ -141,5 +176,8 @@ int main(int cantArg,char* argsMain[]){
 
 
 void magia(){
-    printf("-----------------------VERSION 1.2------------------------\n");
+    printf("--------------------------------VERSION 1.3---------------------------------\n");
+    printf("-----Jamon: Se analiza el header y se cargan los registros DS,EX,SS,CS------\n");
+    printf("---Pendiente: Memoria dinamica // Operador indirecto // Erorres de la pila--\n");
+    printf("---Pendiente: Codificar nuevas instrucciones // Errores acceso de memoria---\n");
 }
