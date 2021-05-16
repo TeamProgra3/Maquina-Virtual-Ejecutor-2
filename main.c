@@ -224,6 +224,7 @@ void magia(){
     printf("--------------------------------VERSION 2.1---------------------------------\n");
     printf("-----Jamon: Lee header y se cargan los registros DS,EX,SS,CS------\n");
     printf("--Jamon: Operadores indirectos funcionando, falta testeo todavia no olvidar--\n");
-    printf("---Pendiente: Memoria dinamica // Operador indirecto // Erorres de la pila--\n");
-    printf("---Pendiente: Codificar nuevas instrucciones // Errores acceso de memoria---\n");
+    printf("---------------Pendiente: Memoria dinamica // Erorres de la pila--------------\n");
+    printf("----Pendiente: Codificar nuevas instrucciones // Errores acceso de memoria----\n");
+    printf("-----------------------------------------------------------------------------\n\n");
 }

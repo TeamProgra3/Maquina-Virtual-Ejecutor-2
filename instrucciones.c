@@ -194,10 +194,10 @@ int anytoint(char *s, char **out) {
     return strtol(s, out, base);
 }
 void SYS(int *a,int *b,int REG[],int RAM[]) {
-    int i=0;
+    int DSL,i=0;
     char aux;
     int Eseg[ REG[ES]>>16 ];
-
+    DSL = REG[DS] & 0xFFFF;
     switch(*a) {
     case 1:
        //arranco en DX+SD (segmento de datos)
@@ -206,7 +206,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                 printf("\n[%04i]:",REG[DX]+i);
         scanf(" %c",&aux);
         while (aux != '\n'){
-            RAM[REG[DS] +REG[DX]+i] = aux;
+            RAM[DSL +REG[DX]+i] = aux;
             scanf("%c",&aux);
             i++;
         }
@@ -230,17 +230,18 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         }
         break;
     case 2:
+       
         for( i=0; i<=REG[CX]-1; i++) {
             if (!((REG[AX]>>11)&0xF))            //veifica %800
                 printf("[%04i]:",REG[DX]+i);
             if (REG[AX]&0x1)
-                printf("%i ",RAM[REG[DS]+REG[DX]+i]);
+                printf("%i ",RAM[DSL+REG[DX]+i]);
             if (REG[AX]&0x4)
-                printf("%o ",RAM[REG[DS]+REG[DX]+i]);
+                printf("%o ",RAM[DSL+REG[DX]+i]);
             if (REG[AX]&0x8)
-                printf("%x ",RAM[REG[DS]+REG[DX]+i]);
+                printf("%x ",RAM[DSL+REG[DX]+i]);
             if (REG[AX]&0x10)
-                printf("%c ",(char)RAM[REG[DS]+REG[DX]+i]);
+                printf("%c ",(char)RAM[DSL+REG[DX]+i]);
             if (!((REG[AX]>>8)&0x1))
                 printf("\n");
         }
@@ -330,7 +331,7 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
                 RecuperaString(RAM[i],salida);
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             }
-        printf("\nRegistros: \n");
+        printf("\n Registros: \n");
         printf("DS = %X --> DSH = %X | DSL = %X \n",REG[DS], DSH,DSL);
         printf("ES = %X --> ESH = %X | ESL = %X \n",REG[ES], ESH,ESL);
         printf("SS = %X --> SSH = %X | SSL = %X \n",REG[SS], SSH,SSL);
