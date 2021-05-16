@@ -290,11 +290,14 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
 }
 
 void muestra(int *a,int *b,int REG[],int RAM[]) {
-    int i,j=0;
+    int DSL,CSH,DSH,i,j=0;
     char salida[50] = {' '};
     printf("\n");
-    if (REG[IP]<REG[DS]) {
-           system("cls");
+    DSH = (REG[DS] >> 4) & 0xFFFF;
+    DSL = REG[DS] & 0xFFFF;
+    CSH = (REG[CS] >> 4) & 0xFFFF;
+    if (REG[IP]<CSH) {
+        system("cls");
         if(REG[IP]<5)
             for(i=0; i<REG[IP]; i++) {
                 RecuperaString(RAM[i],salida);
@@ -308,17 +311,17 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
         RecuperaString(RAM[REG[IP]],salida);
         printf(">[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
         i  = REG[IP];
-        if(REG[DS]-i>5)
+        if(CSH-i>5)
             for(i=REG[IP]+1; i<=REG[IP]+4; i++) {
                 RecuperaString(RAM[i],salida);
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             } else
-            for(i=REG[IP]+1; i<REG[DS]; i++) {
+            for(i=REG[IP]+1; i<CSH; i++) {
                 RecuperaString(RAM[i],salida);
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             }
         printf("Registros: \n");
-        printf("DS = \t %i \n",REG[DS]);
+        printf("DS = %X | DSH = %X | DSL = %X \n",REG[DS], DSH,DSL);
         printf("\t IP = \t %i \n",REG[IP]);
         printf("CC = \t %d | AC = \t %d | AX = \t %d | BX = \t %d \n",REG[CC],REG[AC],REG[AX],REG[BX]);
         printf("CX = \t %d | DX = \t %d | EX = \t %d | FX = \t %d \n",REG[CX],REG[DX],REG[14],REG[15]);
@@ -348,7 +351,7 @@ void barrab(int RAM[],int REG[]) {
             aux[j] = '\0';
             d1=anytoint(aux,NULL);
             if(c[j]=='\0')
-                printf("[%04i]: %i\n",d1,RAM[d1+REG[DS]]); //estoy en el caso donde el usuario ingreso UN SOLO DECIMAL
+                printf("[%04i]: %i\n",d1,RAM[d1]); //estoy en el caso donde el usuario ingreso UN SOLO DECIMAL
             else {
                 k=0;
                 while(c[j]!='\0') {
@@ -359,7 +362,7 @@ void barrab(int RAM[],int REG[]) {
                 }
                 d2=anytoint(aux,NULL);
                 for(j=d1; j<=d2; j++)
-                    printf("[%04i]: %i\n",j,RAM[j+REG[DS]]);
+                    printf("[%04i]: %i\n",j,RAM[j]);
             }
             printf("\n[%04i] cmd:",REG[IP]);gets(c);
         }

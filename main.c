@@ -4,7 +4,7 @@
 #include "string.h"
 void magia();
 void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
-    int aux,topA,topB;
+    int celdafinal,segmento,registro,offset,DSL,aux,topA,topB;
 
     aux = (var>>24)&0xFF;
     if (aux == 0xFF){    //SIN OPERANDO
@@ -28,11 +28,25 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
 
             case 0x2 :    //TIPO DIRECTO - UN SOLO OPERANDO
                 **opA = var & 0xFFFF;
-                *opA = &RAM[REG[DS]+**opA];
+                DSL = REG[DS] & 0xFF;
+                *opA = &RAM[DSL+**opA];
                 break;
-            case 0x3 :    //TIPO INDIRECTO - UN SOLO OPERANDO
-                //ACÁ VA EL CODIGO 
-                //DEL OPERANDO INDIRECTO
+            case 0x3 :    //Indirecto
+                offset = (var>>4) & 0xFF;
+                registro = var & 0xF;
+                //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de 
+                //ese registro, que me indica respecto a que segmento de la memoria se trabaja
+                segmento = (REG[registro] >> 16) & 0xFFFF;
+                //La parte alta de segmento indica el tamanio asignado a ese segmento
+                //La parte baja contiene la celda donde comienza ese segmento
+                
+                //Luego la celda a devolver es:
+                            //parte baja segmento + contenido registro + offset
+                celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
+                if (celdafinal  < (REG[segmento]>>16) & 0xFFFF )
+                    *opA = &RAM[celdafinal];
+                else
+                    **opA = -1;
                 break;
             }
         }else{                     // DOS OPERANDOS
@@ -53,11 +67,25 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
 
             case 0x2 :                      //opA: TIPO DIRECTO
                 **opA = (var>>12) & 0x00FFF;
-                *opA = &RAM[REG[DS]+**opA];
+                DSL = REG[DS] & 0xFF;
+                *opA = &RAM[DSL+**opA];
                 break;
-            case 0x3 :    //TIPO INDIRECTO - UN SOLO OPERANDO
-                //ACÁ VA EL CODIGO 
-                //DEL OPERANDO INDIRECTO
+            case 0x3 :    //Indirecto
+                offset = (var>>4) & 0xFF;
+                registro = var & 0xF;
+                //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de 
+                //ese registro, que me indica respecto a que segmento de la memoria se trabaja
+                segmento = (REG[registro] >> 16) & 0xFFFF;
+                //La parte alta de segmento indica el tamanio asignado a ese segmento
+                //La parte baja contiene la celda donde comienza ese segmento
+                
+                //Luego la celda a devolver es:
+                            //parte baja segmento + contenido registro + offset
+                celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
+                if (celdafinal  < (REG[segmento]>>16) & 0xFFFF )
+                    *opA = &RAM[celdafinal];
+                else
+                    **opA = -1;
                 break;
             }
             
@@ -76,11 +104,25 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
 
             case 0x2 :                      //opB: TIPO INMEDIATO
                 **opB = var & 0xFFF;
-                *opB = &RAM[REG[DS]+**opB];
+                DSL = REG[DS] & 0xFF;
+                *opB = &RAM[DSL+**opB];
                 break;
-            case 0x3 :    //TIPO INDIRECTO - UN SOLO OPERANDO
-                //ACÁ VA EL CODIGO 
-                //DEL OPERANDO INDIRECTO
+            case 0x3 :    //Indirecto
+                offset = (var>>4) & 0xFF;
+                registro = var & 0xF;
+                //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de 
+                //ese registro, que me indica respecto a que segmento de la memoria se trabaja
+                segmento = (REG[registro] >> 16) & 0xFFFF;
+                //La parte alta de segmento indica el tamanio asignado a ese segmento
+                //La parte baja contiene la celda donde comienza ese segmento
+                
+                //Luego la celda a devolver es:
+                            //parte baja segmento + contenido registro + offset
+                celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
+                if (celdafinal  < (REG[segmento]>>16) & 0xFFFF )
+                    *opB = &RAM[celdafinal];
+                else
+                    **opB = -1;
                 break;
             }
         }
@@ -89,11 +131,13 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
 
 void Ejecucion(int RAM[], int REG[]){
     int *opA,*opB,*auxA,*auxB;
-
+    int CSH,DSH;
     auxA = (int*)malloc(sizeof(int));
     auxB = (int*)malloc(sizeof(int));
     cargainstrucciones();
-    while(REG[IP] >= 0 && REG[IP] < REG[DS]){  //IP >= 0 && IP < DS
+    DSH = (REG[DS] >> 4) & 0xFFFF;
+    CSH = (REG[CS] >> 4) & 0xFFFF;
+    while(REG[IP] >= 0 && REG[IP] < CSH){  //IP >= 0 && IP < DS
         opA=auxA;opB=auxB;
         traduce(RAM[REG[IP]],&opA,&opB,RAM,REG);    //traduce(inst[IP])
         INST[cod](opA,opB,REG,RAM);
@@ -108,6 +152,7 @@ void leeArch(char nombreArch[50],int RAM[],int REG[]){
     int tamanoDS, tamanoES, tamanoSS,tamanoCS;
     REG[DS] = 0;
     arch = fopen(nombreArch,"rb");
+    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/prueba.bin", "rb");
     if (arch != NULL){
         fread(&aux, sizeof(int), 1, arch);
         if (aux == 0x4D563231){
@@ -117,10 +162,10 @@ void leeArch(char nombreArch[50],int RAM[],int REG[]){
             fread(&tamanoCS, sizeof(int), 1, arch);
 
             if (tamanoES+tamanoCS+tamanoDS+tamanoSS<=8192){
-                REG[CS] = tamanoCS << 4;  //
-                REG[DS] = tamanoDS << 4 || (tamanoCS); 
-                REG[ES] = tamanoES << 4 || (tamanoCS+tamanoDS);
-                REG[ES] = tamanoSS << 4 || (tamanoES+tamanoCS+tamanoDS);
+                REG[CS] = (tamanoCS) << 16;  //
+                REG[DS] = (tamanoDS << 16) | (tamanoCS); 
+                REG[ES] = (tamanoES << 16) | (tamanoCS+tamanoDS);
+                REG[ES] = (tamanoSS << 16) | (tamanoES+tamanoCS+tamanoDS);
                 cont = 0;
                 while (fread(&aux,sizeof(int),1,arch)==1){ //Carga instrucciones y constantes string en CS
                     RAM[cont] = aux;
@@ -176,8 +221,9 @@ int main(int cantArg,char* argsMain[]){
 
 
 void magia(){
-    printf("--------------------------------VERSION 1.3---------------------------------\n");
-    printf("-----Jamon: Se analiza el header y se cargan los registros DS,EX,SS,CS------\n");
+    printf("--------------------------------VERSION 2.1---------------------------------\n");
+    printf("-----Jamon: Lee header y se cargan los registros DS,EX,SS,CS------\n");
+    printf("--Jamon: Operadores indirectos funcionando, falta testeo todavia no olvidar--\n");
     printf("---Pendiente: Memoria dinamica // Operador indirecto // Erorres de la pila--\n");
     printf("---Pendiente: Codificar nuevas instrucciones // Errores acceso de memoria---\n");
 }
