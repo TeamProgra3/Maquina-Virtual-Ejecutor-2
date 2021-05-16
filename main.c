@@ -135,8 +135,8 @@ void Ejecucion(int RAM[], int REG[]){
     auxA = (int*)malloc(sizeof(int));
     auxB = (int*)malloc(sizeof(int));
     cargainstrucciones();
-    DSH = (REG[DS] >> 4) & 0xFFFF;
-    CSH = (REG[CS] >> 4) & 0xFFFF;
+    DSH = (REG[DS] >> 16) & 0xFFFF;
+    CSH = (REG[CS] >> 16) & 0xFFFF;
     while(REG[IP] >= 0 && REG[IP] < CSH){  //IP >= 0 && IP < DS
         opA=auxA;opB=auxB;
         traduce(RAM[REG[IP]],&opA,&opB,RAM,REG);    //traduce(inst[IP])
@@ -165,7 +165,7 @@ void leeArch(char nombreArch[50],int RAM[],int REG[]){
                 REG[CS] = (tamanoCS) << 16;  //
                 REG[DS] = (tamanoDS << 16) | (tamanoCS); 
                 REG[ES] = (tamanoES << 16) | (tamanoCS+tamanoDS);
-                REG[ES] = (tamanoSS << 16) | (tamanoES+tamanoCS+tamanoDS);
+                REG[SS] = (tamanoSS << 16) | (tamanoES+tamanoCS+tamanoDS);
                 cont = 0;
                 while (fread(&aux,sizeof(int),1,arch)==1){ //Carga instrucciones y constantes string en CS
                     RAM[cont] = aux;

@@ -158,18 +158,23 @@ void RecuperaString(int cod, char salida[50]) {
                     sprintf(aux2, " %cX", op2 + 55);
                 else
                     sprintf(aux2, " AC");
-            else
+            else if (tipoOp2 == 0)
                 sprintf(aux2, " %d ", op2);
+            else//tipo op3
+                sprintf(aux2, " [%cX]", op2 + 55);
+
         }
         if (tipoOp1 == 2)
-            sprintf(aux1, " [%d]", op1);
+            sprintf(aux1, " [%d],", op1);
         else if (tipoOp1 == 1)
             if (op1 != 9)
-                sprintf(aux1, " %cX", op1 + 55);
+                sprintf(aux1, " %cX,", op1 + 55);
             else
-                sprintf(aux1, " AC");
-        else
-            sprintf(aux1, " %d ", op1);
+                sprintf(aux1, " AC,");
+        else if (tipoOp1 == 0)
+            sprintf(aux1, " %d ,", op1);
+        else //tipo op3
+            sprintf(aux1, " [%cX],", op1 + 55);
         strcat(salida, aux1);
         if (existeOp2)
             strcat(salida, aux2);
@@ -290,12 +295,17 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
 }
 
 void muestra(int *a,int *b,int REG[],int RAM[]) {
-    int DSL,CSH,DSH,i,j=0;
+    int ESH,ESL,SSH,SSL,CSL,DSL,CSH,DSH,i,j=0;
     char salida[50] = {' '};
     printf("\n");
-    DSH = (REG[DS] >> 4) & 0xFFFF;
+    DSH = (REG[DS] >> 16) & 0xFFFF;
     DSL = REG[DS] & 0xFFFF;
-    CSH = (REG[CS] >> 4) & 0xFFFF;
+    ESH = (REG[ES] >> 16) & 0xFFFF;
+    ESL = REG[ES] & 0xFFFF;
+    SSH = (REG[SS] >> 16) & 0xFFFF;
+    SSL = REG[SS] & 0xFFFF;
+    CSH = (REG[CS] >> 16) & 0xFFFF;
+    CSL = REG[CS] & 0xFFFF;
     if (REG[IP]<CSH) {
         system("cls");
         if(REG[IP]<5)
@@ -320,9 +330,12 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
                 RecuperaString(RAM[i],salida);
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             }
-        printf("Registros: \n");
-        printf("DS = %X | DSH = %X | DSL = %X \n",REG[DS], DSH,DSL);
-        printf("\t IP = \t %i \n",REG[IP]);
+        printf("\nRegistros: \n");
+        printf("DS = %X --> DSH = %X | DSL = %X \n",REG[DS], DSH,DSL);
+        printf("ES = %X --> ESH = %X | ESL = %X \n",REG[ES], ESH,ESL);
+        printf("SS = %X --> SSH = %X | SSL = %X \n",REG[SS], SSH,SSL);
+        printf("CS = %X --> CSH = %X | CSL = %X \n",REG[CS], CSH,CSL);
+        printf("IP = \t %i \n",REG[IP]);
         printf("CC = \t %d | AC = \t %d | AX = \t %d | BX = \t %d \n",REG[CC],REG[AC],REG[AX],REG[BX]);
         printf("CX = \t %d | DX = \t %d | EX = \t %d | FX = \t %d \n",REG[CX],REG[DX],REG[14],REG[15]);
         barrab(RAM,REG);
