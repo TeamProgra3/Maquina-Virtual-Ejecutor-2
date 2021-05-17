@@ -158,18 +158,23 @@ void RecuperaString(int cod, char salida[50]) {
                     sprintf(aux2, " %cX", op2 + 55);
                 else
                     sprintf(aux2, " AC");
-            else
+            else if (tipoOp2 == 0)
                 sprintf(aux2, " %d ", op2);
+            else//tipo op3
+                sprintf(aux2, " [%cX]", op2 + 55);
+
         }
         if (tipoOp1 == 2)
-            sprintf(aux1, " [%d]", op1);
+            sprintf(aux1, " [%d],", op1);
         else if (tipoOp1 == 1)
             if (op1 != 9)
-                sprintf(aux1, " %cX", op1 + 55);
+                sprintf(aux1, " %cX,", op1 + 55);
             else
-                sprintf(aux1, " AC");
-        else
-            sprintf(aux1, " %d ", op1);
+                sprintf(aux1, " AC,");
+        else if (tipoOp1 == 0)
+            sprintf(aux1, " %d ,", op1);
+        else //tipo op3
+            sprintf(aux1, " [%cX],", op1 + 55);
         strcat(salida, aux1);
         if (existeOp2)
             strcat(salida, aux2);
@@ -189,10 +194,10 @@ int anytoint(char *s, char **out) {
     return strtol(s, out, base);
 }
 void SYS(int *a,int *b,int REG[],int RAM[]) {
-    int i=0;
+    int DSL,i=0;
     char aux;
     int Eseg[ REG[ES]>>16 ];
-
+    DSL = REG[DS] & 0xFFFF;
     switch(*a) {
     case 1:
        //arranco en DX+SD (segmento de datos)
@@ -201,7 +206,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                 printf("\n[%04i]:",REG[DX]+i);
         scanf(" %c",&aux);
         while (aux != '\n'){
-            RAM[REG[DS] +REG[DX]+i] = aux;
+            RAM[DSL +REG[DX]+i] = aux;
             scanf("%c",&aux);
             i++;
         }
@@ -225,17 +230,18 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         }
         break;
     case 2:
+       
         for( i=0; i<=REG[CX]-1; i++) {
             if (!((REG[AX]>>11)&0xF))            //veifica %800
                 printf("[%04i]:",REG[DX]+i);
             if (REG[AX]&0x1)
-                printf("%i ",RAM[REG[DS]+REG[DX]+i]);
+                printf("%i ",RAM[DSL+REG[DX]+i]);
             if (REG[AX]&0x4)
-                printf("%o ",RAM[REG[DS]+REG[DX]+i]);
+                printf("%o ",RAM[DSL+REG[DX]+i]);
             if (REG[AX]&0x8)
-                printf("%x ",RAM[REG[DS]+REG[DX]+i]);
+                printf("%x ",RAM[DSL+REG[DX]+i]);
             if (REG[AX]&0x10)
-                printf("%c ",(char)RAM[REG[DS]+REG[DX]+i]);
+                printf("%c ",(char)RAM[DSL+REG[DX]+i]);
             if (!((REG[AX]>>8)&0x1))
                 printf("\n");
         }
@@ -290,11 +296,19 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
 }
 
 void muestra(int *a,int *b,int REG[],int RAM[]) {
-    int i,j=0;
+    int ESH,ESL,SSH,SSL,CSL,DSL,CSH,DSH,i,j=0;
     char salida[50] = {' '};
     printf("\n");
-    if (REG[IP]<REG[DS]) {
-           system("cls");
+    DSH = (REG[DS] >> 16) & 0xFFFF;
+    DSL = REG[DS] & 0xFFFF;
+    ESH = (REG[ES] >> 16) & 0xFFFF;
+    ESL = REG[ES] & 0xFFFF;
+    SSH = (REG[SS] >> 16) & 0xFFFF;
+    SSL = REG[SS] & 0xFFFF;
+    CSH = (REG[CS] >> 16) & 0xFFFF;
+    CSL = REG[CS] & 0xFFFF;
+    if (REG[IP]<CSH) {
+        system("cls");
         if(REG[IP]<5)
             for(i=0; i<REG[IP]; i++) {
                 RecuperaString(RAM[i],salida);
@@ -308,18 +322,21 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
         RecuperaString(RAM[REG[IP]],salida);
         printf(">[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
         i  = REG[IP];
-        if(REG[DS]-i>5)
+        if(CSH-i>5)
             for(i=REG[IP]+1; i<=REG[IP]+4; i++) {
                 RecuperaString(RAM[i],salida);
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             } else
-            for(i=REG[IP]+1; i<REG[DS]; i++) {
+            for(i=REG[IP]+1; i<CSH; i++) {
                 RecuperaString(RAM[i],salida);
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             }
-        printf("Registros: \n");
-        printf("DS = \t %i \n",REG[DS]);
-        printf("\t IP = \t %i \n",REG[IP]);
+        printf("\n Registros: \n");
+        printf("DS = %X --> DSH = %X | DSL = %X \n",REG[DS], DSH,DSL);
+        printf("ES = %X --> ESH = %X | ESL = %X \n",REG[ES], ESH,ESL);
+        printf("SS = %X --> SSH = %X | SSL = %X \n",REG[SS], SSH,SSL);
+        printf("CS = %X --> CSH = %X | CSL = %X \n",REG[CS], CSH,CSL);
+        printf("IP = \t %i \n",REG[IP]);
         printf("CC = \t %d | AC = \t %d | AX = \t %d | BX = \t %d \n",REG[CC],REG[AC],REG[AX],REG[BX]);
         printf("CX = \t %d | DX = \t %d | EX = \t %d | FX = \t %d \n",REG[CX],REG[DX],REG[14],REG[15]);
         barrab(RAM,REG);
@@ -348,7 +365,7 @@ void barrab(int RAM[],int REG[]) {
             aux[j] = '\0';
             d1=anytoint(aux,NULL);
             if(c[j]=='\0')
-                printf("[%04i]: %i\n",d1,RAM[d1+REG[DS]]); //estoy en el caso donde el usuario ingreso UN SOLO DECIMAL
+                printf("[%04i]: %i\n",d1,RAM[d1]); //estoy en el caso donde el usuario ingreso UN SOLO DECIMAL
             else {
                 k=0;
                 while(c[j]!='\0') {
@@ -359,7 +376,7 @@ void barrab(int RAM[],int REG[]) {
                 }
                 d2=anytoint(aux,NULL);
                 for(j=d1; j<=d2; j++)
-                    printf("[%04i]: %i\n",j,RAM[j+REG[DS]]);
+                    printf("[%04i]: %i\n",j,RAM[j]);
             }
             printf("\n[%04i] cmd:",REG[IP]);gets(c);
         }
