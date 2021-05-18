@@ -43,7 +43,7 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 //Luego la celda a devolver es:
                             //parte baja segmento + contenido registro + offset
                 celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
-                if (celdafinal  < (REG[segmento]>>16) & 0xFFFF )
+                if (celdafinal  < ((REG[segmento]>>16) & 0xFFFF ))
                     *opA = &RAM[celdafinal];
                 else
                     **opA = -1;
@@ -82,7 +82,7 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 //Luego la celda a devolver es:
                             //parte baja segmento + contenido registro + offset
                 celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
-                if (celdafinal  < (REG[segmento]>>16) & 0xFFFF )
+                if (celdafinal  < ((REG[segmento]>>16) & 0xFFFF ))
                     *opA = &RAM[celdafinal];
                 else
                     **opA = -1;
@@ -119,7 +119,7 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 //Luego la celda a devolver es:
                             //parte baja segmento + contenido registro + offset
                 celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
-                if (celdafinal  < (REG[segmento]>>16) & 0xFFFF )
+                if (celdafinal  < ((REG[segmento]>>16) & 0xFFFF ))
                     *opB = &RAM[celdafinal];
                 else
                     **opB = -1;

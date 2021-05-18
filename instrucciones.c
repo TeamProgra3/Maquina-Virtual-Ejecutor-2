@@ -34,6 +34,10 @@ void cargainstrucciones() {
     INST[0xF9]=LDH;
     INST[0xFA]=RND;
     INST[0xFB]=NOT;
+    INST[0xFC]=PUSH;
+    INST[0xFD]=POP;
+    INST[0xFE]=CALL;
+    INST[0xFF0]=RET;
     INST[0xFF1]=STOP;
 }
 void mnemonicos() {
@@ -64,6 +68,10 @@ void mnemonicos() {
     MNEM[0xF9]="LDH";
     MNEM[0xFA]="RND";
     MNEM[0xFB]="NOT";
+    MNEM[0xFC]="PUSH";
+    MNEM[0xFD]="POP";
+    MNEM[0xFE]="CALL";
+    MNEM[0xFF0]="RET";
     MNEM[0xFF1]="STOP";
 }
 
@@ -227,35 +235,54 @@ int anytoint(char *s, char **out) {
     return strtol(s, out, base);
 }
 void SYS(int *a,int *b,int REG[],int RAM[]) {
-    int DSL,i=0;
+    int DSL,i=0,DXL,DXH,ESL,SSL,CSL,DIR;
     char aux,c;
     int Eseg[ REG[ES]>>16 ];
     DSL = REG[DS] & 0xFFFF;
+    DXL = REG[DX] & 0xFFFF;
+    DXH = (REG[DX] >> 16)& 0xFFFF;
+    ESL = REG[ES] & 0xFFFF;
+    SSL = REG[SS] & 0xFFFF;
+    CSL = REG[CS] & 0xFFFF;
+    switch(DXH){
+    case 0:
+        DIR = DXL + DSL;
+    break;
+    case 1:
+        DIR = DXL + ESL;
+    break;
+    case 2:
+        DIR = DXL + SSL;
+    break;
+    case 3:
+        DIR = DXL + CSL;
+    break;
+    }
     switch(*a) {
     case 1:
        //arranco en DX+SD (segmento de datos)
         if (((REG[AX]>>8) &0x1 ) == 0x1){
             if (!((REG[AX]>>11) == 0x1))
-                printf("\n[%04i]:",REG[DX]+i);
+                printf("\n[%04i]:",DXL+i);
         scanf(" %c",&aux);
         while (aux != '\n'){
-            RAM[DSL +REG[DX]+i] = aux;
+            RAM[DSL+DXL+i] = aux;
             scanf("%c",&aux);
             i++;
         }
         }else{
             for( i=0; i<=REG[CX]-1; i++){//CX veces
                 if (!((REG[AX]>>11) == 0x1))
-                    printf("\n[%04i]:",REG[DX]+i);
+                    printf("\n[%04i]:",DXL+i);
                 switch(REG[AX]&0xF){            //La operacion depende del valor en AX
                 case(0x1):
-                    scanf("%i",&RAM[REG[DS]+REG[DX]+i]);
+                    scanf("%i",&RAM[DSL+DXL+i]);
                     break;
                 case(0x4):
-                    scanf("%o",&RAM[REG[DS]+REG[DX]+i]);
+                    scanf("%o",&RAM[DSL+DXL+i]);
                     break;
                 case(0x8):
-                    scanf("%x",&RAM[REG[DS]+REG[DX]+i]);
+                    scanf("%x",&RAM[DSL+DXL+i]);
                     break;
                 }
             }
@@ -266,35 +293,36 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
 
         for( i=0; i<=REG[CX]-1; i++) {
             if (!((REG[AX]>>11)&0xF))            //veifica %800
-                printf("[%04i]:",REG[DX]+i);
+                printf("[%04i]:",DSL+DXL+i);
             if (REG[AX]&0x1)
-                printf("%i ",RAM[DSL+REG[DX]+i]);
+                printf("%i ",RAM[DSL+DXL+i]);
             if (REG[AX]&0x4)
-                printf("%o ",RAM[DSL+REG[DX]+i]);
+                printf("%o ",RAM[DSL+DXL+i]);
             if (REG[AX]&0x8)
-                printf("%x ",RAM[DSL+REG[DX]+i]);
+                printf("%x ",RAM[DSL+DXL+i]);
             if (REG[AX]&0x10)
-                printf("%c ",(char)RAM[DSL+REG[DX]+i]);
+                printf("%c ",(char)RAM[DSL+DXL+i]);
             if (!((REG[AX]>>8)&0x1))
                 printf("\n");
         }
         break;
     case 3: //(STRING READ)
         if (!((REG[AX]>>11)&0xF))
-            printf("[%04i]:",REG[DX]);
+            printf("[%04i]:",DIR);
         scanf("%c",&c);
         while (c != '\n' && i < REG[CX]-1){
-            RAM[REG[DX]+i]=c;
+            RAM[DIR+i]=c;
             i++;
             scanf("%c",&c);
         }
-        RAM[REG[DX]+i]=0; //\0 o 0?
+        RAM[DIR+i]=0; //\0 o 0?
         break;
     case 4: //(STRING WRITE)
-        while (REG[DX+i] != 0 && i < REG[CX]-1){
+
+        while (DIR+i != 0 && i < REG[CX]-1){
             if (!((REG[AX]>>11)&0xF))
-                printf("[%04i]:",REG[DX]+i);
-            printf("%c",RAM[REG[DX]+i]);
+                printf("[%04i]:",DIR+i);
+            printf("%c",RAM[DIR+i]);
             i++;
         }
         if (!((REG[AX]>>8)&0x1))
@@ -487,7 +515,18 @@ void NOT(int *a,int *b,int REG[],int RAM[]) {
     *a=~(*a);
     cargarCC(a,REG);
 }
+void PUSH(int *a,int *b,int REG[],int RAM[]) {
 
+}
+void POP(int *a,int *b,int REG[],int RAM[]) {
+
+}
+void CALL(int *a,int *b,int REG[],int RAM[]) {
+
+}
+void RET(int *a,int *b,int REG[],int RAM[]) {
+
+}
 void STOP(int *a,int *b,int REG[],int RAM[]) {
     REG[IP]=REG[DS];
 }
