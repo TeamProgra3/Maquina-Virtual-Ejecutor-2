@@ -19,6 +19,9 @@ void cargainstrucciones() {
     INST[0x9]=AND;
     INST[0xA]=OR;
     INST[0xB]=XOR;
+    INST[0xC]=SLEN;
+    INST[0xD]=SMOV;
+    INST[0xE]=SCMP;
     INST[0xF0]=SYS;
     INST[0xF1]=JMP;
     INST[0xF2]=JZ;
@@ -46,6 +49,9 @@ void mnemonicos() {
     MNEM[0x9]="AND";
     MNEM[0xA]="OR";
     MNEM[0xB]="XOR";
+    MNEM[0xC]="SLEN";
+    MNEM[0xD]="SMOV";
+    MNEM[0xE]="SCMP";
     MNEM[0xF0]="SYS";
     MNEM[0xF1]="JMP";
     MNEM[0xF2]="JZ";
@@ -117,6 +123,33 @@ void XOR(int *a,int *b,int REG[],int RAM[]) {
     *a=(*a)^(*b);
     cargarCC(a,REG);
 }
+
+void SLEN(int *a,int *b,int REG[],int RAM[]) {
+    int i=0;
+    while (*(b+i) != 0x0)
+        i++;
+    (*a)=i;
+}
+
+void SMOV(int *a,int *b,int REG[],int RAM[]) {
+    int i=0;
+    while (*(b+i) != 0x0){
+        *(a+i)=*(b+i);
+        i++;
+    }
+    *(a+i) = 0x0;
+}
+
+void SCMP(int *a,int *b,int REG[],int RAM[]) {
+    int i=0,aux=0;
+    aux = *a - *b;
+    while(*(a+i) != 0x0 && *(b+i) != 0x0 && aux == 0){
+        aux = *(a+i) - *(b+i);
+        i++;
+    }
+    cargarCC(&aux,REG);
+}
+
 void SHL(int *a,int *b,int REG[],int RAM[]) {
     *a=*a<<*b;
     cargarCC(a,REG);
@@ -195,7 +228,7 @@ int anytoint(char *s, char **out) {
 }
 void SYS(int *a,int *b,int REG[],int RAM[]) {
     int DSL,i=0;
-    char aux;
+    char aux,c;
     int Eseg[ REG[ES]>>16 ];
     DSL = REG[DS] & 0xFFFF;
     switch(*a) {
@@ -230,7 +263,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         }
         break;
     case 2:
-       
+
         for( i=0; i<=REG[CX]-1; i++) {
             if (!((REG[AX]>>11)&0xF))            //veifica %800
                 printf("[%04i]:",REG[DX]+i);
@@ -247,8 +280,25 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         }
         break;
     case 3: //(STRING READ)
+        if (!((REG[AX]>>11)&0xF))
+            printf("[%04i]:",REG[DX]);
+        scanf("%c",&c);
+        while (c != '\n' && i < REG[CX]-1){
+            RAM[REG[DX]+i]=c;
+            i++;
+            scanf("%c",&c);
+        }
+        RAM[REG[DX]+i]=0; //\0 o 0?
         break;
     case 4: //(STRING WRITE)
+        while (REG[DX+i] != 0 && i < REG[CX]-1){
+            if (!((REG[AX]>>11)&0xF))
+                printf("[%04i]:",REG[DX]+i);
+            printf("%c",RAM[REG[DX]+i]);
+            i++;
+        }
+        if (!((REG[AX]>>8)&0x1))
+            printf("\n");
         break;
     case 5: //Requiere en CX la cantidad de celdas que se solicitan y devuelve en DX un puntero a la primer celda para su uso dentro de ES
         //int ESeg[ REG[ES]>>16 ];
@@ -369,7 +419,7 @@ void barrab(int RAM[],int REG[]) {
             else {
                 k=0;
                 while(c[j]!='\0') {
-                    //aux[k++]=c[j++]; 
+                    //aux[k++]=c[j++];
                     aux[k]=c[j];                 //guardo en aux el segundo decimal
                     j++;
                     k++;                //guardo en aux el segundo decimal

@@ -34,12 +34,12 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
             case 0x3 :    //Indirecto
                 offset = (var>>4) & 0xFF;
                 registro = var & 0xF;
-                //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de 
+                //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de
                 //ese registro, que me indica respecto a que segmento de la memoria se trabaja
                 segmento = (REG[registro] >> 16) & 0xFFFF;
                 //La parte alta de segmento indica el tamanio asignado a ese segmento
                 //La parte baja contiene la celda donde comienza ese segmento
-                
+
                 //Luego la celda a devolver es:
                             //parte baja segmento + contenido registro + offset
                 celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
@@ -73,12 +73,12 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
             case 0x3 :    //Indirecto
                 offset = (var>>4) & 0xFF;
                 registro = var & 0xF;
-                //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de 
+                //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de
                 //ese registro, que me indica respecto a que segmento de la memoria se trabaja
                 segmento = (REG[registro] >> 16) & 0xFFFF;
                 //La parte alta de segmento indica el tamanio asignado a ese segmento
                 //La parte baja contiene la celda donde comienza ese segmento
-                
+
                 //Luego la celda a devolver es:
                             //parte baja segmento + contenido registro + offset
                 celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
@@ -88,7 +88,7 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                     **opA = -1;
                 break;
             }
-            
+
 
             switch (topB){
             case 0x0 :                      //opB: TIPO INMEDIATO
@@ -110,12 +110,12 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
             case 0x3 :    //Indirecto
                 offset = (var>>4) & 0xFF;
                 registro = var & 0xF;
-                //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de 
+                //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de
                 //ese registro, que me indica respecto a que segmento de la memoria se trabaja
                 segmento = (REG[registro] >> 16) & 0xFFFF;
                 //La parte alta de segmento indica el tamanio asignado a ese segmento
                 //La parte baja contiene la celda donde comienza ese segmento
-                
+
                 //Luego la celda a devolver es:
                             //parte baja segmento + contenido registro + offset
                 celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
@@ -163,7 +163,7 @@ void leeArch(char nombreArch[50],int RAM[],int REG[]){
 
             if (tamanoES+tamanoCS+tamanoDS+tamanoSS<=8192){
                 REG[CS] = (tamanoCS) << 16;  //
-                REG[DS] = (tamanoDS << 16) | (tamanoCS); 
+                REG[DS] = (tamanoDS << 16) | (tamanoCS);
                 REG[ES] = (tamanoES << 16) | (tamanoCS+tamanoDS);
                 REG[SS] = (tamanoSS << 16) | (tamanoES+tamanoCS+tamanoDS);
                 cont = 0;
@@ -177,7 +177,7 @@ void leeArch(char nombreArch[50],int RAM[],int REG[]){
                     printf("OVERFLOW [CS]: La cantidad de instrucciones supera las establecidas como maximo en el header\n");
                 }
         }
-        else 
+        else
             printf("La cabecera del archivo no es valida (Se esperaba MV21)\n");
         fclose(arch);
     }else
@@ -221,9 +221,10 @@ int main(int cantArg,char* argsMain[]){
 
 
 void magia(){
-    printf("--------------------------------VERSION 2.1---------------------------------\n");
+    printf("--------------------------------VERSION 2.2---------------------------------\n");
     printf("-----Jamon: Lee header y se cargan los registros DS,EX,SS,CS------\n");
     printf("--Jamon: Operadores indirectos funcionando, falta testeo todavia no olvidar--\n");
+    printf("----------------------Falcomps:testear cadena de string------------------------\n\n");
     printf("---------------Pendiente: Memoria dinamica // Erorres de la pila--------------\n");
     printf("----Pendiente: Codificar nuevas instrucciones // Errores acceso de memoria----\n");
     printf("-----------------------------------------------------------------------------\n\n");
