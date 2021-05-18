@@ -133,7 +133,7 @@ void SLEN(int *a,int *b,int REG[],int RAM[]) {
 
 void SMOV(int *a,int *b,int REG[],int RAM[]) {
     int i=0;
-    while (*b+i) != 0x0){
+    while (*(b+i) != 0x0){
         *(a+i)=*(b+i);
         i++;
     }
@@ -142,7 +142,8 @@ void SMOV(int *a,int *b,int REG[],int RAM[]) {
 
 void SCMP(int *a,int *b,int REG[],int RAM[]) {
     int i=0,aux=0;
-    while(*(a+i) != 0x0 && *(b+i) != 0x0 && aux=0){
+    aux = *a - *b;
+    while(*(a+i) != 0x0 && *(b+i) != 0x0 && aux == 0){
         aux = *(a+i) - *(b+i);
         i++;
     }
@@ -227,7 +228,7 @@ int anytoint(char *s, char **out) {
 }
 void SYS(int *a,int *b,int REG[],int RAM[]) {
     int DSL,i=0;
-    char aux;
+    char aux,c;
     int Eseg[ REG[ES]>>16 ];
     DSL = REG[DS] & 0xFFFF;
     switch(*a) {
@@ -279,19 +280,17 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         }
         break;
     case 3: //(STRING READ)
-        char c;int i=0;
         if (!((REG[AX]>>11)&0xF))
             printf("[%04i]:",REG[DX]);
         scanf("%c",&c);
-        while (c != "\n" && i < REG[CX]-1){
+        while (c != '\n' && i < REG[CX]-1){
             RAM[REG[DX]+i]=c;
             i++;
             scanf("%c",&c);
         }
-        RAM[REG[DX]+i]="\0"; //\0 o 0?
+        RAM[REG[DX]+i]=0; //\0 o 0?
         break;
     case 4: //(STRING WRITE)
-        int i=0;
         while (REG[DX+i] != 0 && i < REG[CX]-1){
             if (!((REG[AX]>>11)&0xF))
                 printf("[%04i]:",REG[DX]+i);
