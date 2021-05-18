@@ -63,7 +63,10 @@ void LDH(int *a,int *b,int REG[],int RAM[]);
 void LDL(int *a,int *b,int REG[],int RAM[]);
 void RND(int *a,int *b,int REG[],int RAM[]);
 void NOT(int *a,int *b,int REG[],int RAM[]);
+void PUSH(int *a,int *b,int REG[],int RAM[]);
+void POP(int *a,int *b,int REG[],int RAM[]);
+void CALL(int *a,int *b,int REG[],int RAM[]);
 
 //Instruccion sin operando
-
+void RET(int *a,int *b,int REG[],int RAM[]);
 void STOP(int *a,int *b,int REG[],int RAM[]);
