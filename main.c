@@ -33,6 +33,8 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 break;
             case 0x3 :    //Indirecto
                 offset = (var>>4) & 0xFF;
+                offset <<= 24;
+                offset >>= 24;
                 registro = var & 0xF;
                 //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de
                 //ese registro, que me indica respecto a que segmento de la memoria se trabaja
@@ -74,6 +76,8 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 auxiliar=var;
                 var >>= 12;
                 offset = (var>>4) & 0xFF;
+                 offset <<= 24;
+                offset >>= 24;
                 registro = var & 0xF;
                 //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de
                 //ese registro, que me indica respecto a que segmento de la memoria se trabaja
@@ -112,6 +116,8 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 break;
             case 0x3 :    //Indirecto
                 offset = (var>>4) & 0xFF;
+                offset <<= 24;
+                offset >>= 24;
                 registro = var & 0xF;
                 //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de
                 //ese registro, que me indica respecto a que segmento de la memoria se trabaja

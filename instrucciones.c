@@ -208,6 +208,8 @@ void RecuperaString(int cod, char salida[50]) {
                     sprintf(aux2, ", %d ", op2);
             else{//tipo op3
                 offset = (op2>>4) & 0xFF;
+                offset <<= 24;
+                offset >>= 24;
                 registro = op2 & 0xF;
                 if (registro >= 10 && registro <=15)
                     sprintf(aux2, ", [%cX", op2 + 55);
@@ -221,7 +223,6 @@ void RecuperaString(int cod, char salida[50]) {
                      strcat(aux2, auxOffset);
                 }
                 else if (offset < 0){
-                    strcat(aux2, "-");
                     strcat(aux2, auxOffset);
                 }
                 strcat(aux2, "]");
@@ -243,6 +244,8 @@ void RecuperaString(int cod, char salida[50]) {
                 sprintf(aux1, " %d ", op1);
         else{//tipo op3
                 offset = (op1>>4) & 0xFF;
+                offset <<= 24;
+                offset >>= 24;
                 registro = op1 & 0xF;
                 if (registro >= 10 && registro <=15)
                     sprintf(aux1, " [%cX", op2 + 55);
@@ -256,7 +259,6 @@ void RecuperaString(int cod, char salida[50]) {
                      strcat(aux1, auxOffset);
                 }
                 else if (offset < 0){
-                    strcat(aux1, "-");
                     strcat(aux1, auxOffset);
                 }
                 strcat(aux1, "]");
