@@ -157,8 +157,8 @@ void leeArch(char nombreArch[50],int RAM[],int REG[]){
         fread(&aux, sizeof(int), 1, arch);
         if (aux == 0x4D563231){
             fread(&tamanoDS, sizeof(int), 1, arch);
-            fread(&tamanoES, sizeof(int), 1, arch);
             fread(&tamanoSS, sizeof(int), 1, arch);
+            fread(&tamanoES, sizeof(int), 1, arch);
             fread(&tamanoCS, sizeof(int), 1, arch);
 
             if (tamanoES+tamanoCS+tamanoDS+tamanoSS<=8192){
@@ -171,8 +171,10 @@ void leeArch(char nombreArch[50],int RAM[],int REG[]){
                     RAM[cont] = aux;
                     cont++;
                 }
-                if(cont<=tamanoCS)
+                if(cont<=tamanoCS){
+                    REG[SP] = REG[BP] = (1 << 16) | (tamanoSS);
                     Ejecucion(RAM, REG);
+                }
                 else
                     printf("OVERFLOW [CS]: La cantidad de instrucciones supera las establecidas como maximo en el header\n");
                 }
@@ -221,11 +223,12 @@ int main(int cantArg,char* argsMain[]){
 
 
 void magia(){
-    printf("--------------------------------VERSION 2.2---------------------------------\n");
+    printf("--------------------------------VERSION 2.3---------------------------------\n");
     printf("-----Jamon: Lee header y se cargan los registros DS,EX,SS,CS------\n");
     printf("--Jamon: Operadores indirectos funcionando, falta testeo todavia no olvidar--\n");
     printf("----------------------Falcomps:testear cadena de string------------------------\n\n");
-    printf("---------------Pendiente: Memoria dinamica // Erorres de la pila--------------\n");
+    printf("-----Jamon: Pila hecha 19/05 a la maniana------\n");
+    printf("---------------Pendiente: Memoria dinamica --------------\n");
     printf("----Pendiente: Codificar nuevas instrucciones // Errores acceso de memoria----\n");
     printf("-----------------------------------------------------------------------------\n\n");
 }

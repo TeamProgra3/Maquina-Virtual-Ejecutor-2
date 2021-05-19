@@ -193,29 +193,29 @@ void RecuperaString(int cod, char salida[50]) {
             op2 = op2 << 20;
             op2 = op2 >> 20;
             if (tipoOp2 == 2)
-                sprintf(aux2, " [%d] ", op2);
+                sprintf(aux2, ", [%d] ", op2);
             else if (tipoOp2 == 1)
                 if (op2 != 9)
-                    sprintf(aux2, " %cX", op2 + 55);
+                    sprintf(aux2, ", %cX", op2 + 55);
                 else
-                    sprintf(aux2, " AC");
+                    sprintf(aux2, ", AC");
             else if (tipoOp2 == 0)
-                sprintf(aux2, " %d ", op2);
+                sprintf(aux2, ", %d ", op2);
             else//tipo op3
-                sprintf(aux2, " [%cX]", op2 + 55);
+                sprintf(aux2, ", [%cX]", op2 + 55);
 
         }
         if (tipoOp1 == 2)
-            sprintf(aux1, " [%d],", op1);
+            sprintf(aux1, " [%d]", op1);
         else if (tipoOp1 == 1)
             if (op1 != 9)
-                sprintf(aux1, " %cX,", op1 + 55);
+                sprintf(aux1, " %cX", op1 + 55);
             else
-                sprintf(aux1, " AC,");
+                sprintf(aux1, " AC");
         else if (tipoOp1 == 0)
-            sprintf(aux1, " %d ,", op1);
+            sprintf(aux1, " %d ", op1);
         else //tipo op3
-            sprintf(aux1, " [%cX],", op1 + 55);
+            sprintf(aux1, " [%cX] ", op1 + 55);
         strcat(salida, aux1);
         if (existeOp2)
             strcat(salida, aux2);
@@ -402,9 +402,11 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
 }
 
 void muestra(int *a,int *b,int REG[],int RAM[]) {
-    int ESH,ESL,SSH,SSL,CSL,DSL,CSH,DSH,i,j=0;
+    int SPL,BPL,ESH,ESL,SSH,SSL,CSL,DSL,CSH,DSH,i,j=0;
     char salida[50] = {' '};
     printf("\n");
+    SPL = REG[SP] & 0xFFFF;
+    BPL = REG[BP] & 0xFFFF;
     DSH = (REG[DS] >> 16) & 0xFFFF;
     DSL = REG[DS] & 0xFFFF;
     ESH = (REG[ES] >> 16) & 0xFFFF;
@@ -442,7 +444,7 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
         printf("ES = %X --> ESH = %X | ESL = %X \n",REG[ES], ESH,ESL);
         printf("SS = %X --> SSH = %X | SSL = %X \n",REG[SS], SSH,SSL);
         printf("CS = %X --> CSH = %X | CSL = %X \n",REG[CS], CSH,CSL);
-        printf("IP = \t %i \n",REG[IP]);
+        printf("IP = \t %i | SPL = \t %d (Abs: %d) | BPL = \t %d (Abs: %d) \n",REG[IP],SPL,SPL+SSL,BPL,BPL+SSL);
         printf("CC = \t %d | AC = \t %d | AX = \t %d | BX = \t %d \n",REG[CC],REG[AC],REG[AX],REG[BX]);
         printf("CX = \t %d | DX = \t %d | EX = \t %d | FX = \t %d \n",REG[CX],REG[DX],REG[14],REG[15]);
         barrab(RAM,REG);
@@ -544,15 +546,70 @@ void NOT(int *a,int *b,int REG[],int RAM[]) {
     cargarCC(a,REG);
 }
 void PUSH(int *a,int *b,int REG[],int RAM[]) {
-
+    int SPL = REG[SP] & 0xFFFF;
+    int SSL = REG[SS] & 0xFFFF;
+    if (SPL == 0){
+        printf("==================================\n");
+        printf("STACK OVERFLOW! Instruccion nro: %d \n", REG[IP]);
+        printf("SP = 0x%X || BP = 0x%X || SS = 0x%X\n", REG[SP], REG[BP], REG[SS]);
+        printf("SPL = %d - Tamanio pila: %d\n", SPL, (REG[SS]>>16)&0xffff);
+        printf("==================================\n");
+        REG[IP]=REG[DS];
+    } else{
+        REG[SP]--;
+        SPL = REG[SP] & 0xFFFF;
+        RAM[SSL+SPL] = *a;
+    }
 }
 void POP(int *a,int *b,int REG[],int RAM[]) {
+    int SPL = REG[SP] & 0xFFFF;
+    int SSL = REG[SS] & 0xFFFF;
+    int SSH = REG[SS]>>16 & 0xFFFF;
+     if (SPL == SSH){ //Celda que quiero es igual al tamaño
+        printf("==================================\n");
+        printf("STACK UNDERFLOW! Instruccion nro: %d \n", REG[IP]);
+        printf("SP = 0x%X || BP = 0x%X || SS = 0x%X\n", REG[SP], REG[BP], REG[SS]);
+        printf("SPL = %d - Tamanio pila: %d\n", SPL, (REG[SS]>>16)&0xffff);
+        printf("==================================\n");
+     } else {
+         *a = RAM[SSL + SPL];
+         REG[SP]++;
+    }
 
 }
 void CALL(int *a,int *b,int REG[],int RAM[]) {
+    int SPL = REG[SP] & 0xFFFF;
+    int SSL = REG[SS] & 0xFFFF;
+    if (SPL == 0){
+        printf("==================================\n");
+        printf("STACK OVERFLOW! Instruccion nro: %d \n", REG[IP]);
+        printf("SP = 0x%X || BP = 0x%X || SS = 0x%X\n", REG[SP], REG[BP], REG[SS]);
+        printf("SPL = %d - Tamanio pila: %d\n", SPL, (REG[SS]>>16)&0xffff);
+        printf("==================================\n");
+        REG[IP]=REG[DS];
+    } else {
+        REG[SP]--;
+        SPL = REG[SP] & 0xFFFF;
+        RAM[SSL+SPL] = REG[IP]+1;
+        REG[IP] = (*a)-1; //Porque IP se incrementa solo al terminas la instruccion
+    }
 
+        
 }
 void RET(int *a,int *b,int REG[],int RAM[]) {
+    int SPL = REG[SP] & 0xFFFF;
+    int SSL = REG[SS] & 0xFFFF;
+    int SSH = REG[SS]>>16 & 0xFFFF;
+     if (SPL == SSH){ //Celda que quiero es igual al tamaño
+        printf("==================================\n");
+        printf("STACK UNDERFLOW! Instruccion nro: %d \n", REG[IP]);
+        printf("SP = 0x%X || BP = 0x%X || SS = 0x%X\n", REG[SP], REG[BP], REG[SS]);
+        printf("SPL = %d - Tamanio pila: %d\n", SPL, (REG[SS]>>16)&0xffff);
+        printf("==================================\n");
+     } else {
+         REG[IP] = RAM[SSL + SPL]-1; //-1 porque IP se incrementa solo al terminar instruccion
+         REG[SP]++;
+    }
 
 }
 void STOP(int *a,int *b,int REG[],int RAM[]) {
