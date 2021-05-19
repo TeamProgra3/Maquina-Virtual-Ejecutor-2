@@ -362,3 +362,4 @@ Ejecutor.layout
 *.cbp
 *.depend
 *.layout
+*.json
