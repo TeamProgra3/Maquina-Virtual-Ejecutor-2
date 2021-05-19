@@ -4,7 +4,7 @@
 #include "string.h"
 void magia();
 void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
-    int celdafinal,segmento,registro,offset,DSL,aux,topA,topB;
+    int auxiliar,celdafinal,segmento,registro,offset,DSL,aux,topA,topB;
 
     aux = (var>>24)&0xFF;
     if (aux == 0xFF){    //SIN OPERANDO
@@ -41,9 +41,9 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 //La parte baja contiene la celda donde comienza ese segmento
 
                 //Luego la celda a devolver es:
-                            //parte baja segmento + contenido registro + offset
-                celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
-                if (celdafinal  < ((REG[segmento]>>16) & 0xFFFF ))
+                            //parte baja segmento + contenido registro parte baja + offset
+               celdafinal = (REG[segmento] & 0xFFFF) + (REG[registro]&0xFFFF) + offset;
+                if (celdafinal > (REG[segmento] & 0xFFFF) && celdafinal  < ((REG[segmento] & 0xFFFF) + ((REG[segmento]>>16) & 0xFFFF )))
                     *opA = &RAM[celdafinal];
                 else
                     **opA = -1;
@@ -71,6 +71,8 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
                 *opA = &RAM[DSL+**opA];
                 break;
             case 0x3 :    //Indirecto
+                auxiliar=var;
+                var >>= 12;
                 offset = (var>>4) & 0xFF;
                 registro = var & 0xF;
                 //Tenemos el registro pedido y el offset, ahora hay que sacar la parte alta de
@@ -81,11 +83,12 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
 
                 //Luego la celda a devolver es:
                             //parte baja segmento + contenido registro + offset
-                celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
-                if (celdafinal  < ((REG[segmento]>>16) & 0xFFFF ))
+                celdafinal = (REG[segmento] & 0xFFFF) + (REG[registro]&0xFFFF) + offset;
+                if (celdafinal > (REG[segmento] & 0xFFFF) && celdafinal  < (REG[segmento] & 0xFFFF) + ((REG[segmento]>>16) & 0xFFFF ))
                     *opA = &RAM[celdafinal];
                 else
                     **opA = -1;
+                var = auxiliar;
                 break;
             }
 
@@ -118,8 +121,8 @@ void traduce(int var,int** opA,int** opB,int RAM[],int REG[]){
 
                 //Luego la celda a devolver es:
                             //parte baja segmento + contenido registro + offset
-                celdafinal = (REG[segmento] & 0xFFFF) + REG[registro] + offset;
-                if (celdafinal  < ((REG[segmento]>>16) & 0xFFFF ))
+                celdafinal = (REG[segmento] & 0xFFFF) + (REG[registro]&0xFFFF) + offset;
+                if (celdafinal > (REG[segmento] & 0xFFFF) && celdafinal  < (REG[segmento] & 0xFFFF) + ((REG[segmento]>>16) & 0xFFFF ))
                     *opB = &RAM[celdafinal];
                 else
                     **opB = -1;
@@ -152,7 +155,7 @@ void leeArch(char nombreArch[50],int RAM[],int REG[]){
     int tamanoDS, tamanoES, tamanoSS,tamanoCS;
     REG[DS] = 0;
     arch = fopen(nombreArch,"rb");
-    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/prueba.bin", "rb");
+    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/factoClase.bin", "rb");
     if (arch != NULL){
         fread(&aux, sizeof(int), 1, arch);
         if (aux == 0x4D563231){

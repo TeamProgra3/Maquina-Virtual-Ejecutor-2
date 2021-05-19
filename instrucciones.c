@@ -168,8 +168,8 @@ void SHR(int *a,int *b,int REG[],int RAM[]) {
 }
 
 void RecuperaString(int cod, char salida[50]) {
-    int codaux, op1, op2, tipoOp1, tipoOp2, existeOp2 = 0;
-    char aux1[50], aux2[50];
+    int offset,registro,codaux, op1, op2, tipoOp1, tipoOp2, existeOp2 = 0;
+    char auxOffset[50],aux1[50], aux2[50];
     codaux = ((cod >> 24) & 0xFF);
     if (codaux != 0xFF) {
         if (((cod >> 28) & 0xF)  == 0xF) {  //Un solo operando
@@ -194,28 +194,73 @@ void RecuperaString(int cod, char salida[50]) {
             op2 = op2 >> 20;
             if (tipoOp2 == 2)
                 sprintf(aux2, ", [%d] ", op2);
-            else if (tipoOp2 == 1)
-                if (op2 != 9)
+            else if (tipoOp2 == 1){
+                if (op2 >=10 && op2 <= 15)
                     sprintf(aux2, ", %cX", op2 + 55);
-                else
+                else if (op2 == 9) 
                     sprintf(aux2, ", AC");
+                else if (op2 == 6)
+                    sprintf(aux2, ", SP");
+                else if (op2 == 7)
+                    sprintf(aux2, ", BP");
+            }
             else if (tipoOp2 == 0)
-                sprintf(aux2, ", %d ", op2);
-            else//tipo op3
-                sprintf(aux2, ", [%cX]", op2 + 55);
-
+                    sprintf(aux2, ", %d ", op2);
+            else{//tipo op3
+                offset = (op2>>4) & 0xFF;
+                registro = op2 & 0xF;
+                if (registro >= 10 && registro <=15)
+                    sprintf(aux2, ", [%cX", op2 + 55);
+                else if ( registro == 7)
+                    sprintf(aux2, ", [BP");
+                else if ( registro == 6)
+                    sprintf(aux2, ", [SP");
+                sprintf(auxOffset, "%d", offset);
+                if (offset > 0){
+                     strcat(aux2, "+");
+                     strcat(aux2, auxOffset);
+                }
+                else if (offset < 0){
+                    strcat(aux2, "-");
+                    strcat(aux2, auxOffset);
+                }
+                strcat(aux2, "]");
+            }
         }
         if (tipoOp1 == 2)
             sprintf(aux1, " [%d]", op1);
-        else if (tipoOp1 == 1)
-            if (op1 != 9)
+        else if (tipoOp1 == 1){
+            if (op1 >=10 && op1 <= 15)
                 sprintf(aux1, " %cX", op1 + 55);
-            else
+            else if (op1 == 9) 
                 sprintf(aux1, " AC");
+            else if (op1 == 6)
+                sprintf(aux1, " SP");
+            else if (op1 == 7)
+                sprintf(aux1, " BP");
+            }
         else if (tipoOp1 == 0)
-            sprintf(aux1, " %d ", op1);
-        else //tipo op3
-            sprintf(aux1, " [%cX] ", op1 + 55);
+                sprintf(aux1, " %d ", op1);
+        else{//tipo op3
+                offset = (op1>>4) & 0xFF;
+                registro = op1 & 0xF;
+                if (registro >= 10 && registro <=15)
+                    sprintf(aux1, " [%cX", op2 + 55);
+                else if ( registro == 7)
+                    sprintf(aux1, " [BP");
+                else if ( registro == 6)
+                    sprintf(aux1, " [SP");
+                sprintf(auxOffset, "%d", offset);
+                if (offset > 0){
+                     strcat(aux1, "+");
+                     strcat(aux1, auxOffset);
+                }
+                else if (offset < 0){
+                    strcat(aux1, "-");
+                    strcat(aux1, auxOffset);
+                }
+                strcat(aux1, "]");
+            }
         strcat(salida, aux1);
         if (existeOp2)
             strcat(salida, aux2);
@@ -550,7 +595,7 @@ void PUSH(int *a,int *b,int REG[],int RAM[]) {
     int SSL = REG[SS] & 0xFFFF;
     if (SPL == 0){
         printf("==================================\n");
-        printf("STACK OVERFLOW! Instruccion nro: %d \n", REG[IP]);
+        printf("STACK OVERFLOW! Instruccion nro: %d \n", REG[IP]+1);
         printf("SP = 0x%X || BP = 0x%X || SS = 0x%X\n", REG[SP], REG[BP], REG[SS]);
         printf("SPL = %d - Tamanio pila: %d\n", SPL, (REG[SS]>>16)&0xffff);
         printf("==================================\n");
@@ -582,7 +627,7 @@ void CALL(int *a,int *b,int REG[],int RAM[]) {
     int SSL = REG[SS] & 0xFFFF;
     if (SPL == 0){
         printf("==================================\n");
-        printf("STACK OVERFLOW! Instruccion nro: %d \n", REG[IP]);
+        printf("STACK OVERFLOW! Instruccion nro: %d \n", REG[IP]+1);
         printf("SP = 0x%X || BP = 0x%X || SS = 0x%X\n", REG[SP], REG[BP], REG[SS]);
         printf("SPL = %d - Tamanio pila: %d\n", SPL, (REG[SS]>>16)&0xffff);
         printf("==================================\n");
@@ -602,7 +647,7 @@ void RET(int *a,int *b,int REG[],int RAM[]) {
     int SSH = REG[SS]>>16 & 0xFFFF;
      if (SPL == SSH){ //Celda que quiero es igual al tamaño
         printf("==================================\n");
-        printf("STACK UNDERFLOW! Instruccion nro: %d \n", REG[IP]);
+        printf("STACK UNDERFLOW! Instruccion nro: %d \n", REG[IP]+1);
         printf("SP = 0x%X || BP = 0x%X || SS = 0x%X\n", REG[SP], REG[BP], REG[SS]);
         printf("SPL = %d - Tamanio pila: %d\n", SPL, (REG[SS]>>16)&0xffff);
         printf("==================================\n");
