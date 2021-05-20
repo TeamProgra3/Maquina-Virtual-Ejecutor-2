@@ -377,7 +377,6 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
             printf("\n");
         break;
     case 5: //Requiere en CX la cantidad de celdas que se solicitan y devuelve en DX un puntero a la primer celda para su uso dentro de ES
-        //int ESeg[ REG[ES]>>16 ];
         //Inicializo listas, segmento extra y posiciono la RAM
         if(REG[HP]==0xFFFFFFFF){
             for(i=0;i<=REG[ES]>>16;i++)
@@ -396,8 +395,9 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                 ant=act;
                 act=RAM[Eseg[act]]&0x0000FFFF; //pongo en actual el puntero al siguiente nodo header de HPH
             }
-            actUtilizado=REG[HP]&0x0000FFFF;//con la segunda lista(la de ocupados) voy recorriendo hasta alcanzar la de libres
-            while( actUtilizado<act && (RAM[Eseg[actUtilizado]]&0x0000FFFF)!=REG[HP]>>16){
+            antUtilizado=REG[HP]&0x0000FFFF;//con la segunda lista(la de ocupados) voy recorriendo hasta alcanzar la de libres
+            actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
+            while(!(antUtilizado<act && act<actUtilizado)){
                 antUtilizado=actUtilizado;//3 [ 5  13 ]
                 actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;//13[ 4  3 ]
             }
@@ -429,7 +429,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         }
         break;
     case 6:
-        if(REG[ES]<REG[DX]){
+        if(REG[DX] < (REG[ES]>>16)){
             act=REG[HP]>>16;//disponibles
             ant=0xFFFFFFFF;
             actUtilizado=REG[HP]&0x0000FFFF;//utilizados
@@ -462,7 +462,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                 actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
 
                 while(RAM[Eseg[act]]&0x0000FFFF!=REG[HP]>>16){
-                    if(ant>0 && act<antUtilizado){
+                    if(ant>=0 && act<antUtilizado){
                         cargaHL(&RAM[Eseg[ant]],(RAM[Eseg[ant]]>>16)+(RAM[Eseg[act]]>>16)+1,RAM[Eseg[act]]&0x0000FFFF);
                         ant=REG[HP]>>16;
                         act=RAM[Eseg[ant]]&0x0000FFFF;
