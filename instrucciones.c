@@ -622,7 +622,7 @@ void POP(int *a,int *b,int REG[],int RAM[]) {
     int SSH = REG[SS]>>16 & 0xFFFF;
      if (SPL == SSH){ //Celda que quiero es igual al tamaño
         printf("==================================\n");
-        printf("STACK UNDERFLOW! Instruccion nro: %d \n", REG[IP]);
+        printf("STACK UNDERFLOW! Instruccion nro: %d \n", REG[IP]+1);
         printf("SP = 0x%X || BP = 0x%X || SS = 0x%X\n", REG[SP], REG[BP], REG[SS]);
         printf("SPL = %d - Tamanio pila: %d\n", SPL, (REG[SS]>>16)&0xffff);
         printf("==================================\n");
