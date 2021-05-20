@@ -487,21 +487,29 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             }
         printf("\n Registros: \n");
-        printf("DS = %X --> DSH = %X | DSL = %X \n",REG[DS], DSH,DSL);
-        printf("ES = %X --> ESH = %X | ESL = %X \n",REG[ES], ESH,ESL);
-        printf("SS = %X --> SSH = %X | SSL = %X \n",REG[SS], SSH,SSL);
-        printf("CS = %X --> CSH = %X | CSL = %X \n",REG[CS], CSH,CSL);
-        printf("IP = \t %i | SPL = \t %d (Abs: %d) | BPL = \t %d (Abs: %d) \n",REG[IP],SPL,SPL+SSL,BPL,BPL+SSL);
+        printf("DS = %X --> DSH = %d | DSL = %d ||| ",REG[DS], DSH,DSL);
+        printf("ES = %X --> ESH = %d | ESL = %d \n",REG[ES], ESH,ESL);
+        printf("SS = %X --> SSH = %d | SSL = %d ||| ",REG[SS], SSH,SSL);
+        printf("CS = %X --> CSH = %d | CSL = %d \n",REG[CS], CSH,CSL);
+        printf("IP = \t %i | HP = \t %d\n",REG[IP],REG[HP]);
         printf("CC = \t %d | AC = \t %d | AX = \t %d | BX = \t %d \n",REG[CC],REG[AC],REG[AX],REG[BX]);
         printf("CX = \t %d | DX = \t %d | EX = \t %d | FX = \t %d \n",REG[CX],REG[DX],REG[14],REG[15]);
-        barrab(RAM,REG);
+        printf("SPL = \t %d (Abs: %d) | BPL = \t %d (Abs: %d) \n",SPL,SPL+SSL,BPL,BPL+SSL);
+        if (SPL != SSH){
+            printf("== STACK: [%d",RAM[SPL + SSL]);
+            for (int k = SPL + SSL+1; k < SSH + SSL;k++) {
+                printf(", %d",RAM[k]);
+            }
+            printf("] ==\n");
+        }
+        barrab(RAM, REG);
     }
 }
 void barrab(int RAM[],int REG[]) {
 
     int d1,d2;
     int j=0,k=0;
-    char c[10],aux[10];
+    char c[10],aux[10],aux2[10];
 
     printf("\n[%04i] cmd:",REG[IP]);
     fflush(stdin);
@@ -525,11 +533,11 @@ void barrab(int RAM[],int REG[]) {
                 k=0;
                 while(c[j]!='\0') {
                     //aux[k++]=c[j++];
-                    aux[k]=c[j];                 //guardo en aux el segundo decimal
+                    aux2[k]=c[j];                 //guardo en aux el segundo decimal
                     j++;
                     k++;                //guardo en aux el segundo decimal
                 }
-                d2=anytoint(aux,NULL);
+                d2=anytoint(aux2,NULL);
                 for(j=d1; j<=d2; j++)
                     printf("[%04i]: %i\n",j,RAM[j]);
             }
