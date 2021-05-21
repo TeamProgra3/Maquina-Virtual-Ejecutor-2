@@ -155,7 +155,8 @@ void SCMP(int *a,int *b,int REG[],int RAM[]) {
         aux = *(a+i) - *(b+i);
         i++;
     }
-    cargarCC(&aux,REG);
+    if (*(a+i) != 0x0)
+        cargarCC(&aux,REG);
 }
 
 void SHL(int *a,int *b,int REG[],int RAM[]) {
@@ -197,7 +198,7 @@ void RecuperaString(int cod, char salida[50]) {
             else if (tipoOp2 == 1){
                 if (op2 >=10 && op2 <= 15)
                     sprintf(aux2, ", %cX", op2 + 55);
-                else if (op2 == 9) 
+                else if (op2 == 9)
                     sprintf(aux2, ", AC");
                 else if (op2 == 6)
                     sprintf(aux2, ", SP");
@@ -233,7 +234,7 @@ void RecuperaString(int cod, char salida[50]) {
         else if (tipoOp1 == 1){
             if (op1 >=10 && op1 <= 15)
                 sprintf(aux1, " %cX", op1 + 55);
-            else if (op1 == 9) 
+            else if (op1 == 9)
                 sprintf(aux1, " AC");
             else if (op1 == 6)
                 sprintf(aux1, " SP");
@@ -306,7 +307,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         DIR = DXL + CSL;
     break;
     }
-    
+
 
     switch(*a) {
     case 1:
@@ -651,7 +652,7 @@ void CALL(int *a,int *b,int REG[],int RAM[]) {
         REG[IP] = (*a)-1; //Porque IP se incrementa solo al terminas la instruccion
     }
 
-        
+
 }
 void RET(int *a,int *b,int REG[],int RAM[]) {
     int SPL = REG[SP] & 0xFFFF;
