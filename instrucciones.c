@@ -594,8 +594,7 @@ void LDL(int *a,int *b,int REG[],int RAM[]) {
 }
 
 void RND(int *a,int *b,int REG[],int RAM[]) {
-    srand(time(NULL));
-    *a=*a+rand()%(*b+1-*a);
+    REG[AX]=rand()%*b;
 }
 
 void NOT(int *a,int *b,int REG[],int RAM[]) {
