@@ -236,7 +236,7 @@ void leeArch(char nombreArch[50], int RAM[], int REG[]) {
     int tamanoDS, tamanoES, tamanoSS, tamanoCS;
     REG[DS] = 0;
     arch = fopen(nombreArch, "rb");
-    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/Cadena.bin", "rb");
+    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/cmpCadena.bin", "rb");
     if (arch != NULL) {
         fread(&aux, sizeof(int), 1, arch);
         if (aux == 0x4D563231) {
@@ -306,7 +306,6 @@ int main(int cantArg, char* argsMain[]) {
 }
 
 void magia() {
-
     printf("|=======================================================================================|\n");
     printf("|----------------------[>>>> MAQUINA VIRTUAL 2021 - Grupo F <<<<]-----------------------|\n");
     printf("|------------------------------------- VERSION 3.1 -------------------------------------|\n");

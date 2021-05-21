@@ -151,7 +151,7 @@ void SMOV(int *a,int *b,int REG[],int RAM[]) {
 void SCMP(int *a,int *b,int REG[],int RAM[]) {
     int i=0,aux=0;
     aux = *a - *b;
-    while(*(a+i) != 0x0 && *(b+i) != 0x0 && aux == 0){
+    while((*(a+i) != 0x0 || *(b+i) != 0x0) && aux == 0){
         aux = *(a+i) - *(b+i);
         i++;
     }
