@@ -236,7 +236,7 @@ void leeArch(char nombreArch[50], int RAM[], int REG[]) {
     int tamanoDS, tamanoES, tamanoSS, tamanoCS;
     REG[DS] = 0;
     arch = fopen(nombreArch, "rb");
-    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/readCadena.bin", "rb");
+    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/Cadena.bin", "rb");
     if (arch != NULL) {
         fread(&aux, sizeof(int), 1, arch);
         if (aux == 0x4D563231) {
@@ -260,6 +260,9 @@ void leeArch(char nombreArch[50], int RAM[], int REG[]) {
                     Ejecucion(RAM, REG);
                 } else
                     printf("OVERFLOW [CS]: La cantidad de instrucciones supera las establecidas como maximo en el header\n");
+            }
+            else {
+                printf("ERROR EN EL HEADER! La suma de todos los segmentos supera 8192. La suma es: %d\n", tamanoES + tamanoCS + tamanoDS + tamanoSS);
             }
         } else
             printf("La cabecera del archivo no es valida (Se esperaba MV21)\n");
@@ -303,12 +306,10 @@ int main(int cantArg, char* argsMain[]) {
 }
 
 void magia() {
-    printf("--------------------------------VERSION 2.3---------------------------------\n");
-    printf("-----Jamon: Lee header y se cargan los registros DS,EX,SS,CS------\n");
-    printf("--Jamon: Operadores indirectos funcionando, falta testeo todavia no olvidar--\n");
-    printf("-------Falcomps:testear cadena de string-----------------\n\n");
-    printf("-----Jamon: Pila hecha 19/05 a la maniana------\n");
-    printf("---------------Pendiente: Memoria dinamica --------------\n");
-    printf("----Pendiente: Codificar nuevas instrucciones // Errores acceso de memoria----\n");
-    printf("-----------------------------------------------------------------------------\n\n");
+
+    printf("|=======================================================================================|\n");
+    printf("|----------------------[>>>> MAQUINA VIRTUAL 2021 - Grupo F <<<<]-----------------------|\n");
+    printf("|------------------------------------- VERSION 3.1 -------------------------------------|\n");
+    printf("|----------------------------- Pendiente: Memoria dinamica -----------------------------|\n");
+    printf("|=======================================================================================|\n\n");
 }

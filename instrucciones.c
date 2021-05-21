@@ -493,7 +493,7 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
         printf("ES = %X --> ESH = %d | ESL = %d \n",REG[ES], ESH,ESL);
         printf("SS = %X --> SSH = %d | SSL = %d ||| ",REG[SS], SSH,SSL);
         printf("CS = %X --> CSH = %d | CSL = %d \n",REG[CS], CSH,CSL);
-        printf("IP = \t %i | CC0 = \t %d | CC+ = \t %d\n",REG[IP],(REG[CC]>>31)&1,(REG[CC])&1);
+        printf("IP = \t %i | CC- = \t %d | CC0 = \t %d\n",REG[IP],(REG[CC]>>31)&1,(REG[CC])&1);
         printf("HP = \t %d | AC = \t %d | AX = \t %d | BX = \t %d \n",REG[HP],REG[AC],REG[AX],REG[BX]);
         printf("CX = \t %d | DX = \t %d | EX = \t %d | FX = \t %d \n",REG[CX],REG[DX],REG[14],REG[15]);
         printf("SPL = \t %d (Abs: %d) | BPL = \t %d (Abs: %d) \n",SPL,SPL+SSL,BPL,BPL+SSL);
