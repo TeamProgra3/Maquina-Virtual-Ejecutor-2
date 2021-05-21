@@ -363,3 +363,4 @@ Ejecutor.layout
 *.depend
 *.layout
 *.json
+*.bin

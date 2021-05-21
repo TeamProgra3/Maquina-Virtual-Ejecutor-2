@@ -369,7 +369,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         break;
     case 4: //(STRING WRITE)
 
-        while (DIR+i != 0 && i < REG[CX]-1){
+        while (RAM[DIR+i] != 0 && i < REG[CX]-1){
             if (!((REG[AX]>>11)&0xF))
                 printf("[%04i]:",DIR+i);
             printf("%c",RAM[DIR+i]);
@@ -449,7 +449,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
 }
 
 void muestra(int *a,int *b,int REG[],int RAM[]) {
-    int SPL,BPL,ESH,ESL,SSH,SSL,CSL,DSL,CSH,DSH,i,j=0;
+    int contInstrucciones,SPL,BPL,ESH,ESL,SSH,SSL,CSL,DSL,CSH,DSH,i,j=0;
     char salida[50] = {' '};
     printf("\n");
     SPL = REG[SP] & 0xFFFF;
@@ -462,7 +462,9 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
     SSL = REG[SS] & 0xFFFF;
     CSH = (REG[CS] >> 16) & 0xFFFF;
     CSL = REG[CS] & 0xFFFF;
-    if (REG[IP]<CSH) {
+    while((RAM[contInstrucciones]>128 || RAM[contInstrucciones]<0) && contInstrucciones<CSH)
+         contInstrucciones++;
+    if (REG[IP]<contInstrucciones) {
         system("cls");
         if(REG[IP]<5)
             for(i=0; i<REG[IP]; i++) {
@@ -477,12 +479,12 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
         RecuperaString(RAM[REG[IP]],salida);
         printf(">[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
         i  = REG[IP];
-        if(CSH-i>5)
+        if(contInstrucciones-i>5)
             for(i=REG[IP]+1; i<=REG[IP]+4; i++) {
                 RecuperaString(RAM[i],salida);
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             } else
-            for(i=REG[IP]+1; i<CSH; i++) {
+            for(i=REG[IP]+1; i<contInstrucciones; i++) {
                 RecuperaString(RAM[i],salida);
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             }
@@ -491,8 +493,8 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
         printf("ES = %X --> ESH = %d | ESL = %d \n",REG[ES], ESH,ESL);
         printf("SS = %X --> SSH = %d | SSL = %d ||| ",REG[SS], SSH,SSL);
         printf("CS = %X --> CSH = %d | CSL = %d \n",REG[CS], CSH,CSL);
-        printf("IP = \t %i | HP = \t %d\n",REG[IP],REG[HP]);
-        printf("CC = \t %d | AC = \t %d | AX = \t %d | BX = \t %d \n",REG[CC],REG[AC],REG[AX],REG[BX]);
+        printf("IP = \t %i | CC0 = \t %d | CC+ = \t %d\n",REG[IP],(REG[CC]>>31)&1,(REG[CC])&1);
+        printf("HP = \t %d | AC = \t %d | AX = \t %d | BX = \t %d \n",REG[HP],REG[AC],REG[AX],REG[BX]);
         printf("CX = \t %d | DX = \t %d | EX = \t %d | FX = \t %d \n",REG[CX],REG[DX],REG[14],REG[15]);
         printf("SPL = \t %d (Abs: %d) | BPL = \t %d (Abs: %d) \n",SPL,SPL+SSL,BPL,BPL+SSL);
         if (SPL != SSH){
@@ -584,11 +586,11 @@ void JNN(int *a,int *b,int REG[],int RAM[]) {
 }
 
 void LDH(int *a,int *b,int REG[],int RAM[]) {
-    REG[AC] = (((*a)&0x00FF)<<8)|(REG[AC]&0x00FF);
+    REG[AC] = (((*a)<<16)&0xFFFF0000)|(REG[AC]&0xFFFF);
 }
 
 void LDL(int *a,int *b,int REG[],int RAM[]) {
-    REG[AC] = ((*a)&0x00FF)|(REG[AC]&0xFF00);
+    REG[AC] = ((*a)&0xFFFF)|(REG[AC]&0xFFFF0000);
 }
 
 void RND(int *a,int *b,int REG[],int RAM[]) {

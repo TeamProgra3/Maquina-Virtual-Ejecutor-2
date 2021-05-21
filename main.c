@@ -209,22 +209,24 @@ void traduce(int var, int** opA, int** opB, int RAM[], int REG[], int* error) {
 
 void Ejecucion(int RAM[], int REG[]) {
     int *opA, *opB, *auxA, *auxB, error = 0;
-    int CSH, DSH;
+    int contInstrucciones=0,CSH, DSH;
     auxA = (int*)malloc(sizeof(int));
     auxB = (int*)malloc(sizeof(int));
     cargainstrucciones();
     DSH = (REG[DS] >> 16) & 0xFFFF;
     CSH = (REG[CS] >> 16) & 0xFFFF;
-    while (REG[IP] >= 0 && REG[IP] < CSH) {  //IP >= 0 && IP < DS
-        opA = auxA;
-        opB = auxB;
-        traduce(RAM[REG[IP]], &opA, &opB, RAM, REG, &error);  //traduce(inst[IP])
-        if (!error)
-            INST[cod](opA, opB, REG, RAM);
-        REG[IP]++;  //IP++
-        if (sysactivado)
-            muestra(opA, opB, REG, RAM);
-    }
+    while((RAM[contInstrucciones]>128 || RAM[contInstrucciones]<0) && contInstrucciones<CSH)
+         contInstrucciones++;
+    while (REG[IP] >= 0 && REG[IP] < contInstrucciones) {  //IP >= 0 && IP < DS
+            opA = auxA;
+            opB = auxB;
+            traduce(RAM[REG[IP]], &opA, &opB, RAM, REG, &error);  //traduce(inst[IP])
+            if (!error)
+                INST[cod](opA, opB, REG, RAM);
+            REG[IP]++;  //IP++
+            if (sysactivado)
+                muestra(opA, opB, REG, RAM);
+        }
     free(auxA);
     free(auxB);
 }
@@ -234,7 +236,7 @@ void leeArch(char nombreArch[50], int RAM[], int REG[]) {
     int tamanoDS, tamanoES, tamanoSS, tamanoCS;
     REG[DS] = 0;
     arch = fopen(nombreArch, "rb");
-    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/segmentation.bin", "rb");
+    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/readCadena.bin", "rb");
     if (arch != NULL) {
         fread(&aux, sizeof(int), 1, arch);
         if (aux == 0x4D563231) {
