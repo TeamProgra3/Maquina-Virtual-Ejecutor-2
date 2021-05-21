@@ -391,6 +391,23 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
             REG[DX]=(REG[HP]&0xFFFF)+1;
         }else{
             act=REG[HP]>>16;
+
+            if(act==0){
+                actUtilizado=REG[HP]&0x0000FFFF;
+                while(actUtilizado> (RAM[Eseg[act]]&0x0000FFFF)) 
+                    actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;
+                //en este punto act<actU<act&0x0F;
+                if(RAM[Eseg[act]]>>16==REG[CX]){
+                    cargaHL(&REG[HP],RAM[Eseg[act]]&0x0000FFFF,act);
+                    cargaHL(&RAM[Eseg[act]],REG[CX],actUtilizado);
+                }else{
+                    cargaHL(&RAM[Eseg[REG[CX]+1]],actUtilizado-(REG[CX]+1)-1,RAM[Eseg[act]]&0x0000FFFF);
+                    cargaHL(&RAM[Eseg[act]],REG[CX],actUtilizado);
+                    cargaHL(&REG[HP],REG[CX]+1,act);
+                }
+            }
+                
+            
             while((RAM[Eseg[act]]&0x0000FFFF)!=REG[HP]>>16 && (RAM[Eseg[act]]>>16) < REG[CX]){ //mientras NO este en el ultimo header Y el HPH tenga un tama�o menor al requerido
                 ant=act;
                 act=RAM[Eseg[act]]&0x0000FFFF; //pongo en actual el puntero al siguiente nodo header de HPH
