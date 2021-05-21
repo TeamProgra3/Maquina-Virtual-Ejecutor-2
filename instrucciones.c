@@ -155,8 +155,7 @@ void SCMP(int *a,int *b,int REG[],int RAM[]) {
         aux = *(a+i) - *(b+i);
         i++;
     }
-    if (*(a+i) != 0x0)
-        cargarCC(&aux,REG);
+    cargarCC(&aux,REG);
 }
 
 void SHL(int *a,int *b,int REG[],int RAM[]) {
