@@ -236,7 +236,7 @@ void leeArch(char nombreArch[50], int RAM[], int REG[]) {
     int tamanoDS, tamanoES, tamanoSS, tamanoCS;
     REG[DS] = 0;
     arch = fopen(nombreArch, "rb");
-    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/cmpCadena.bin", "rb");
+    //arch = fopen("C:/Users/Augusto/Documents/Facultad/Arquitectura/MaquinaVirtual/Maquina-Virtual-Ejecutor-2/memoria.bin", "rb");
     if (arch != NULL) {
         fread(&aux, sizeof(int), 1, arch);
         if (aux == 0x4D563231) {
