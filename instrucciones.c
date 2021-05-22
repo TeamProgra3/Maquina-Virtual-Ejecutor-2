@@ -39,6 +39,7 @@ void cargainstrucciones() {
     INST[0xFE]=CALL;
     INST[0xFF0]=RET;
     INST[0xFF1]=STOP;
+    srand(time(0));
 }
 void mnemonicos() {
     MNEM[0x0]="MOV";
