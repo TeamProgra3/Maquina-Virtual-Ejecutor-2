@@ -456,6 +456,27 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         break;
     case 6:
         if(REG[DX] < (REG[ES]>>16)){
+            antUtilizado=REG[HP]&0x0000FFFF;
+            actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
+            ant=REG[HP]>>16;
+            act=RAM[Eseg[ant]]&0x0000FFFF;
+            //Mientras no esta en el "ultimo" nodo de HPL && no me de el rango
+            while( (RAM[Eseg[actUtilizado]]&0x0000FFFF)!=REG[HP]&0x0000FFFF  && actUtilizado+(RAM[Eseg[actUtilizado]]>>16) < REG[DX]){
+                antUtilizado=actUtilizado;
+                actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;
+            }
+            while(act<REG[DX]){
+                ant=act;
+                act=RAM[Eseg[act]]&0x0000FFFF;
+            }
+            if(actUtilizado+(RAM[Eseg[actUtilizado]]>>16) >= REG[DX]){
+                cargaHL(&RAM[Eseg[antUtilizado]],RAM[Eseg[antUtilizado]]>>16,RAM[Eseg[actUtilizado]]&0x0000FFFF);
+                cargaHL(&RAM[Eseg[actUtilizado]],RAM[Eseg[actUtilizado]]>>16,ant);//nazi
+                cargaHL(&RAM[Eseg[act]],RAM[Eseg[act]]>>16,actUtilizado);            
+            }
+        }
+    /*
+        if(REG[DX] < (REG[ES]>>16)){
             act=REG[HP]>>16;//disponibles
             ant=0xFFFFFFFF;
             actUtilizado=REG[HP]&0x0000FFFF;//utilizados
@@ -504,6 +525,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
             }
         }else
             printf("Error de memoria");
+            */
         break;
     case 7:
         system("cls");
