@@ -5,7 +5,6 @@
 #include <windows.h>
 #include "operaciones.h"
 
-//Si hay tiempo estaria piola meter ambos vectores en uno solo
 void cargainstrucciones() {
     INST[0x0]=MOV;
     INST[0x1]=ADD;
@@ -198,7 +197,8 @@ void RecuperaString(int cod, char salida[50]) {
             else if (tipoOp2 == 1){
                 if (op2 >=10 && op2 <= 15)
                     sprintf(aux2, ", %cX", op2 + 55);
-                else if (op2 == 9)
+                else if (op2 == 9) 
+
                     sprintf(aux2, ", AC");
                 else if (op2 == 6)
                     sprintf(aux2, ", SP");
@@ -234,7 +234,8 @@ void RecuperaString(int cod, char salida[50]) {
         else if (tipoOp1 == 1){
             if (op1 >=10 && op1 <= 15)
                 sprintf(aux1, " %cX", op1 + 55);
-            else if (op1 == 9)
+            else if (op1 == 9) 
+
                 sprintf(aux1, " AC");
             else if (op1 == 6)
                 sprintf(aux1, " SP");
@@ -308,7 +309,6 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
     break;
     }
 
-
     switch(*a) {
     case 1:
        //arranco en DX+SD (segmento de datos)
@@ -369,7 +369,6 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         RAM[DIR+i]=0; //\0 o 0?
         break;
     case 4: //(STRING WRITE)
-
         while (RAM[DIR+i] != 0 && i < REG[CX]-1){
             if (!((REG[AX]>>11)&0xF))
                 printf("[%04i]:",DIR+i);
@@ -380,7 +379,6 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
             printf("\n");
         break;
     case 5: //Requiere en CX la cantidad de celdas que se solicitan y devuelve en DX un puntero a la primer celda para su uso dentro de ES
-        //int ESeg[ REG[ES]>>16 ];
         //Inicializo listas, segmento extra y posiciono la RAM
         if(REG[HP]==0xFFFFFFFF){
             for(i=0;i<=REG[ES]>>16;i++)
@@ -395,35 +393,52 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
             REG[DX]=(REG[HP]&0xFFFF)+1;
         }else{
             act=REG[HP]>>16;
-            while((RAM[Eseg[act]]&0x0000FFFF)!=REG[HP]>>16 && (RAM[Eseg[act]]>>16) < REG[CX]){ //mientras NO este en el ultimo header Y el HPH tenga un tama�o menor al requerido
-                ant=act;
-                act=RAM[Eseg[act]]&0x0000FFFF; //pongo en actual el puntero al siguiente nodo header de HPH
-            }
-            actUtilizado=REG[HP]&0x0000FFFF;//con la segunda lista(la de ocupados) voy recorriendo hasta alcanzar la de libres
-            while( actUtilizado<act && (RAM[Eseg[actUtilizado]]&0x0000FFFF)!=REG[HP]>>16){
-                antUtilizado=actUtilizado;//3 [ 5  13 ]
-                actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;//13[ 4  3 ]
-            }
-            if((RAM[Eseg[act]]>>16) == REG[CX]){
-                cargaHL(&RAM[Eseg[antUtilizado]] , RAM[Eseg[antUtilizado]]>>16 ,RAM[Eseg[act]]);//1� nodo utilizados
-                cargaHL(&RAM[Eseg[act]]          , REG[CX]                     ,actUtilizado);//2� nodo utilizados
-                cargaHL(&RAM[Eseg[ant]]          , RAM[Eseg[ant]]>>16          ,RAM[Eseg[act]]&0x0000FFFF);//conecto el nodo anterior con el siguiente de actual para HPH
-
-                if(REG[HP]>>16==RAM[Eseg[act]])
-                    cargaHL(&REG[HP]             , RAM[Eseg[act]]&0x0000FFFF   ,act);
-                else
-                    cargaHL(&REG[HP]             , REG[HP]>>16                 ,act);
-            }else{
-                if((RAM[Eseg[act]]>>16) > REG[CX]){
-                    cargaHL(&RAM[Eseg[antUtilizado]]  ,Eseg[antUtilizado]>>16          ,RAM[Eseg[act]]);
-                    cargaHL(&RAM[Eseg[act]]           ,REG[CX]                         ,actUtilizado);
-                    cargaHL(&RAM[Eseg[ant]]           ,Eseg[ant]>>16                   ,act+REG[CX]);
-                    cargaHL(&RAM[Eseg[act+REG[CX]+1]] ,actUtilizado-(act+REG[CX]+1)-1  ,RAM[Eseg[act]]&0x0000FFFF);
-                    if(REG[HP]>>16==RAM[Eseg[act]])
-                        cargaHL(&REG[HP]              ,(REG[HP]>>16)+REG[CX]           ,act);
-                    else
-                        cargaHL(&REG[HP]              , REG[HP]>>16                    ,act);
+            if(act==0){//inserto en la primer posicion y la lista no esta vacia
+                actUtilizado=REG[HP]&0x0000FFFF;
+                while(actUtilizado> (RAM[Eseg[act]]&0x0000FFFF)) 
+                    actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;
+                //en este punto act<actU<act&0x0F;
+                if(RAM[Eseg[act]]>>16==REG[CX]){
+                    cargaHL(&REG[HP],RAM[Eseg[act]]&0x0000FFFF,act);
+                    cargaHL(&RAM[Eseg[act]],REG[CX],actUtilizado);
+                }else{
+                    cargaHL(&RAM[Eseg[REG[CX]+1]],actUtilizado-(REG[CX]+1)-1,RAM[Eseg[act]]&0x0000FFFF);
+                    cargaHL(&RAM[Eseg[act]],REG[CX],actUtilizado);
+                    cargaHL(&REG[HP],REG[CX]+1,act);
                 }
+            }else{//recorro
+                while((RAM[Eseg[act]]&0x0000FFFF)!=REG[HP]>>16 && (RAM[Eseg[act]]>>16) < REG[CX]){ //mientras NO este en el ultimo header Y el HPH tenga un tama�o menor al requerido
+                    ant=act;
+                    act=RAM[Eseg[act]]&0x0000FFFF; //pongo en actual el puntero al siguiente nodo header de HPH
+                }
+                antUtilizado=REG[HP]&0x0000FFFF;//con la segunda lista(la de ocupados) voy recorriendo hasta alcanzar la de libres
+                actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
+                while(!(antUtilizado<act && act<actUtilizado)){
+                    antUtilizado=actUtilizado;//3 [ 5  13 ]
+                    actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;//13[ 4  3 ]
+                }
+                if((RAM[Eseg[act]]>>16) == REG[CX]){
+                    cargaHL(&RAM[Eseg[antUtilizado]] , RAM[Eseg[antUtilizado]]>>16 ,RAM[Eseg[act]]);//1� nodo utilizados
+                    cargaHL(&RAM[Eseg[act]]          , REG[CX]                     ,actUtilizado);//2� nodo utilizados
+                    cargaHL(&RAM[Eseg[ant]]          , RAM[Eseg[ant]]>>16          ,RAM[Eseg[act]]&0x0000FFFF);//conecto el nodo anterior con el siguiente de actual para HPH
+
+                    if(REG[HP]>>16==RAM[Eseg[act]])
+                        cargaHL(&REG[HP]             , RAM[Eseg[act]]&0x0000FFFF   ,act);
+                    else
+                        cargaHL(&REG[HP]             , REG[HP]>>16                 ,act);
+                }else{
+                    if((RAM[Eseg[act]]>>16) > REG[CX]){
+                        cargaHL(&RAM[Eseg[antUtilizado]]  ,Eseg[antUtilizado]>>16          ,RAM[Eseg[act]]);
+                        cargaHL(&RAM[Eseg[act]]           ,REG[CX]                         ,actUtilizado);
+                        cargaHL(&RAM[Eseg[ant]]           ,Eseg[ant]>>16                   ,act+REG[CX]);
+                        cargaHL(&RAM[Eseg[act+REG[CX]+1]] ,actUtilizado-(act+REG[CX]+1)-1  ,RAM[Eseg[act]]&0x0000FFFF);
+                        if(REG[HP]>>16==RAM[Eseg[act]])
+                            cargaHL(&REG[HP]              ,(REG[HP]>>16)+REG[CX]           ,act);
+                        else
+                            cargaHL(&REG[HP]              , REG[HP]>>16                    ,act);
+                    }
+                }
+
             }
             if((RAM[Eseg[act]]&0x0000FFFF)!=REG[HP]>>16 && (RAM[Eseg[act]]>>16)<REG[CX])
                 printf("Espacio insuficiente en memoria dinamica");
@@ -431,7 +446,56 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                 cargaHL(&REG[DX],RAM[Eseg[act]]>>16,act+1);
         }
         break;
-    case 6: //libera la memoria indicada en DX
+    case 6:
+        if(REG[DX] < (REG[ES]>>16)){
+            act=REG[HP]>>16;//disponibles
+            ant=0xFFFFFFFF;
+            actUtilizado=REG[HP]&0x0000FFFF;//utilizados
+            
+            while(actUtilizado>REG[DX] || REG[DX] > (actUtilizado+(RAM[Eseg[actUtilizado]]>>16)) ){//confia(mientras el indice sea menor al buscado, y no este en un nodo sin lugares)
+                antUtilizado=actUtilizado;
+                actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;
+            }
+            if(REG[DX] <= (actUtilizado+(RAM[Eseg[actUtilizado]]>>16)) ){//VERIFICA QUE NO ESTE EN UN NODO DONDE HPH=0
+                while(act<REG[DX]){ 
+                    ant=act;
+                    act=RAM[Eseg[act]]&0x0000FFFF;
+                }   
+                if(ant!=0xFFFFFFFF){//el nodo a liberar no esta en la posicion 0 del ES
+                    cargaHL(&RAM[Eseg[ant]]             ,RAM[Eseg[ant]]>>16             ,actUtilizado);
+                    cargaHL(&RAM[Eseg[actUtilizado]]    ,RAM[Eseg[actUtilizado]]>>16    ,act);
+                }else{//el nodo a liberar esta al comienzo del ES
+                    cargaHL(&RAM[Eseg[0]]               ,RAM[Eseg[0]]>>16               ,REG[HP]>>16);
+                    while((RAM[Eseg[act]]&0x0000FFFF)!=REG[HP]>>16 ){//mientras no este parado en el ultimo nodo
+                        act=RAM[Eseg[act]]&0x0000FFFF;
+                    }
+                    cargaHL(&RAM[Eseg[act]]             ,RAM[Eseg[act]]>>16             ,0);//llegue al ultimo nodo y le digo che apuntame al principio de la LC
+                    cargaHL(&REG[HP]                    ,0                              ,REG[HP]&0x0000FFFF);
+                }
+            
+                //compactacion:
+                ant=REG[HP]>>16;
+                act=RAM[Eseg[ant]]&0x0000FFFF;
+                antUtilizado=REG[HP]&0x0000FFFF;
+                actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
+
+                while(RAM[Eseg[act]]&0x0000FFFF!=REG[HP]>>16){
+                    if(ant>=0 && act<antUtilizado){
+                        cargaHL(&RAM[Eseg[ant]],(RAM[Eseg[ant]]>>16)+(RAM[Eseg[act]]>>16)+1,RAM[Eseg[act]]&0x0000FFFF);
+                        ant=REG[HP]>>16;
+                        act=RAM[Eseg[ant]]&0x0000FFFF;
+                        antUtilizado=REG[HP]&0x0000FFFF;
+                        actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
+                    }else{
+                        ant=act;
+                        act=RAM[Eseg[act]]&0x0000FFFF;
+                        antUtilizado=actUtilizado;
+                        actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;
+                    }
+                }
+            }
+        }else
+            printf("Error de memoria");
         break;
     case 7:
         system("cls");
@@ -481,11 +545,13 @@ void muestra(int *a,int *b,int REG[],int RAM[]) {
         printf(">[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
         i  = REG[IP];
         if(contInstrucciones-i>5)
+
             for(i=REG[IP]+1; i<=REG[IP]+4; i++) {
                 RecuperaString(RAM[i],salida);
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             } else
             for(i=REG[IP]+1; i<contInstrucciones; i++) {
+
                 RecuperaString(RAM[i],salida);
                 printf("[%04i]:%02X %02X %02X %02X %i: %s \n",i,(RAM[i]>>24)&0xFF,(RAM[i]>>16)&0xFF,(RAM[i]>>8)&0xFF,(RAM[i]>>0)&0xFF,j++,salida);
             }
