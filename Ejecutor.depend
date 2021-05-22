@@ -9,3 +9,21 @@
 	<stdio.h>
 	<stdlib.h>
 
+1621622364 source:c:\users\franco\desktop\maquina-virtual-ejecutor-2\main.c
+	<stdio.h>
+	<stdlib.h>
+	"operaciones.h"
+	"string.h"
+
+1621380970 c:\users\franco\desktop\maquina-virtual-ejecutor-2\operaciones.h
+	<stdio.h>
+	<stdlib.h>
+
+1621380970 source:c:\users\franco\desktop\maquina-virtual-ejecutor-2\instrucciones.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+	<windows.h>
+	"operaciones.h"
+

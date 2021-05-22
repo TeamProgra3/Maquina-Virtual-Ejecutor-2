@@ -43,6 +43,9 @@ void CMP(int *a,int *b,int REG[],int RAM[]);
 void AND(int *a,int *b,int REG[],int RAM[]);
 void OR(int *a,int *b,int REG[],int RAM[]);
 void XOR(int *a,int *b,int REG[],int RAM[]);
+void SLEN(int *a,int *b,int REG[],int RAM[]);
+void SMOV(int *a,int *b,int REG[],int RAM[]);
+void SCMP(int *a,int *b,int REG[],int RAM[]);
 void SHL(int *a,int *b,int REG[],int RAM[]);
 void SHR(int *a,int *b,int REG[],int RAM[]);
 
@@ -60,7 +63,10 @@ void LDH(int *a,int *b,int REG[],int RAM[]);
 void LDL(int *a,int *b,int REG[],int RAM[]);
 void RND(int *a,int *b,int REG[],int RAM[]);
 void NOT(int *a,int *b,int REG[],int RAM[]);
+void PUSH(int *a,int *b,int REG[],int RAM[]);
+void POP(int *a,int *b,int REG[],int RAM[]);
+void CALL(int *a,int *b,int REG[],int RAM[]);
 
 //Instruccion sin operando
-
+void RET(int *a,int *b,int REG[],int RAM[]);
 void STOP(int *a,int *b,int REG[],int RAM[]);
