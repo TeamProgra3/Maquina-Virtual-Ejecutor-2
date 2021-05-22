@@ -483,11 +483,29 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                 cargaHL(&RAM[Eseg[antUtilizado]],RAM[Eseg[antUtilizado]]>>16,RAM[Eseg[actUtilizado]]&0x0000FFFF);
                 cargaHL(&RAM[Eseg[actUtilizado]],RAM[Eseg[actUtilizado]]>>16,ant);//ido :)
                 cargaHL(&RAM[Eseg[act]],RAM[Eseg[act]]>>16,actUtilizado);   
-                
+
+                //compactacion:
+                ant=REG[HP]>>16;
+                act=RAM[Eseg[ant]]&0x0000FFFF;
+                antUtilizado=REG[HP]&0x0000FFFF;
+                actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
+
+                while(RAM[Eseg[act]]&0x0000FFFF!=REG[HP]>>16 && !(1+(RAM[Eseg[act]]>>16) ==RAM[Eseg[ant]]&0x0000FFFF) ){
+                    ant=act;
+                    act=RAM[Eseg[act]]&0x0000FFFF;
+                }
+                if(1+(RAM[Eseg[ant]]>>16) ==RAM[Eseg[ant]]&0x0000FFFF){
+                    cargaHL(&RAM[Eseg[ant]],(RAM[Eseg[ant]]>>16)+(RAM[Eseg[act]]>>16)+1,RAM[Eseg[act]&0x0000FFFF]);
+                    if(1+(RAM[Eseg[act]]>>16) ==RAM[Eseg[act]]&0x0000FFFF){
+                        act=RAM[Eseg[act]]&0x0000FFFF;          
+                        cargaHL(&RAM[Eseg[ant]],(RAM[Eseg[ant]]>>16)+(RAM[Eseg[act]]>>16)+1,RAM[Eseg[act]&0x0000FFFF]);
+                    }
+                }
             }
             else{
                 printf("Error en FREE, no puede eliminar la celda pedida [%d]", REG[DX]);
             }
+            
         }
     /*
         if(REG[DX] < (REG[ES]>>16)){
