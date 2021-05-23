@@ -414,7 +414,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                 }
                 antUtilizado=REG[HP]&0x0000FFFF;//con la segunda lista(la de ocupados) voy recorriendo hasta alcanzar la de libres
                 actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
-                while(!(antUtilizado<act && act<actUtilizado)&& !(actUtilizado == 0 && antUtilizado==0)){
+                while((antUtilizado != (REG[HP]&0xFFFF)) && !(antUtilizado<act && act<actUtilizado)&& !(actUtilizado == 0 && antUtilizado==0)){
                     antUtilizado=actUtilizado;//3 [ 5  13 ]
                     actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;//13[ 4  3 ]
                 }
@@ -481,64 +481,32 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                         cargaHL(&REG[HP],REG[HP]>>16,RAM[Eseg[actUtilizado]]&0x0000FFFF);     
                 }  
                 cargaHL(&RAM[Eseg[antUtilizado]],RAM[Eseg[antUtilizado]]>>16,RAM[Eseg[actUtilizado]]&0x0000FFFF);
-                cargaHL(&RAM[Eseg[actUtilizado]],RAM[Eseg[actUtilizado]]>>16,ant);//ido :)
-                cargaHL(&RAM[Eseg[act]],RAM[Eseg[act]]>>16,actUtilizado);   
+                cargaHL(&RAM[Eseg[actUtilizado]],RAM[Eseg[actUtilizado]]>>16,act);//ido :)
+                cargaHL(&RAM[Eseg[ant]],RAM[Eseg[ant]]>>16,actUtilizado);
                 
+                //compactacion:
+                int eliminado = actUtilizado;
+                ant=REG[HP]>>16;
+                act=RAM[Eseg[ant]]&0x0000FFFF;
+
+                while(RAM[Eseg[act]]&0x0000FFFF!=(REG[HP]>>16) && !(((ant + 1+(RAM[Eseg[ant]]>>16)) == (RAM[Eseg[ant]]&0x0000FFFF))) ){
+                    ant=act;
+                    act=RAM[Eseg[act]]&0x0000FFFF;
+                }
+                if((ant+1+(RAM[Eseg[ant]]>>16)) == (RAM[Eseg[ant]]&0x0000FFFF)){ //compacta doble pendiente
+                    cargaHL(&RAM[Eseg[ant]],(RAM[Eseg[ant]]>>16)+(RAM[Eseg[act]]>>16)+1,RAM[Eseg[act]]&0x0000FFFF);
+                    if((ant+1+(RAM[Eseg[ant]]>>16)) == (RAM[Eseg[ant]]&0x0000FFFF)){ //compacta triple pendiente
+                        act = RAM[Eseg[ant]] & 0xFFFF;
+                        cargaHL(&RAM[Eseg[ant]],(RAM[Eseg[act]]>>16)+(RAM[Eseg[ant]]>>16)+1,RAM[Eseg[act]]&0x0000FFFF);
+                    }                           //lo que viene despues + lo que ya traia el actual + 1
+                                            
+                }
             }
             else{
                 printf("Error en FREE, no puede eliminar la celda pedida [%d]", REG[DX]);
             }
+            
         }
-    /*
-        if(REG[DX] < (REG[ES]>>16)){
-            act=REG[HP]>>16;//disponibles
-            ant=0xFFFFFFFF;
-            actUtilizado=REG[HP]&0x0000FFFF;//utilizados
-            
-            while(actUtilizado>REG[DX] || REG[DX] > (actUtilizado+(RAM[Eseg[actUtilizado]]>>16)) ){//confia(mientras el indice sea menor al buscado, y no este en un nodo sin lugares)
-                antUtilizado=actUtilizado;
-                actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;
-            }
-            if(REG[DX] <= (actUtilizado+(RAM[Eseg[actUtilizado]]>>16)) ){//VERIFICA QUE NO ESTE EN UN NODO DONDE HPH=0
-                while(act<REG[DX]){ 
-                    ant=act;
-                    act=RAM[Eseg[act]]&0x0000FFFF;
-                }   
-                if(ant!=0xFFFFFFFF){//el nodo a liberar no esta en la posicion 0 del ES
-                    cargaHL(&RAM[Eseg[ant]]             ,RAM[Eseg[ant]]>>16             ,actUtilizado);
-                    cargaHL(&RAM[Eseg[actUtilizado]]    ,RAM[Eseg[actUtilizado]]>>16    ,act);
-                }else{//el nodo a liberar esta al comienzo del ES
-                    cargaHL(&RAM[Eseg[0]]               ,RAM[Eseg[0]]>>16               ,REG[HP]>>16);
-                    while((RAM[Eseg[act]]&0x0000FFFF)!=REG[HP]>>16 ){//mientras no este parado en el ultimo nodo
-                        act=RAM[Eseg[act]]&0x0000FFFF;
-                    }
-                    cargaHL(&RAM[Eseg[act]]             ,RAM[Eseg[act]]>>16             ,0);//llegue al ultimo nodo y le digo che apuntame al principio de la LC
-                    cargaHL(&REG[HP]                    ,0                              ,REG[HP]&0x0000FFFF);
-                }
-            
-                //compactacion:
-                ant=REG[HP]>>16;
-                act=RAM[Eseg[ant]]&0x0000FFFF;
-                antUtilizado=REG[HP]&0x0000FFFF;
-                actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
-
-                while(RAM[Eseg[act]]&0x0000FFFF!=REG[HP]>>16){
-                    if(ant>=0 && act<antUtilizado){
-                        cargaHL(&RAM[Eseg[ant]],(RAM[Eseg[ant]]>>16)+(RAM[Eseg[act]]>>16)+1,RAM[Eseg[act]]&0x0000FFFF);
-                        ant=REG[HP]>>16;
-                        act=RAM[Eseg[ant]]&0x0000FFFF;
-                        antUtilizado=REG[HP]&0x0000FFFF;
-                        actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
-                    }else{
-                        ant=act;
-                        act=RAM[Eseg[act]]&0x0000FFFF;
-                        antUtilizado=actUtilizado;
-                        actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;
-                    }
-                }
-            }
-        }else
-            printf("Error de memoria");
         break;
     case 7:
         system("cls");
