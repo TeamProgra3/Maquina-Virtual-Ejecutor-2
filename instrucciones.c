@@ -394,11 +394,17 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
             //REG[DX]=(REG[HP]&0xFFFF)+1;
         }else{
             act=REG[HP]>>16;
-            if(act==0){//inserto en la primer posicion y la lista no esta vacia
+            if(act==0 && ((RAM[Eseg[act]]>>16) != 0)){//inserto en la primer posicion y la lista no esta vacia
+                ant = REG[HP] >> 16;
+                while ((RAM[Eseg[ant]]&0x0000FFFF) != 0)
+                    ant = RAM[Eseg[ant]] & 0x0000FFFF;
+                //cuando sale del while, ant tiene el nodo que apunta
+                //a donde va a ser agregado el nodo
+
                 int antMin=REG[HP]&0x0000FFFF;
                 int min=RAM[Eseg[antMin]]&0x0000FFFF;
                 antUtilizado=REG[HP]&0x0000FFFF;
-                actUtilizado=REG[Eseg[antUtilizado]]&0x0000FFFF;
+                actUtilizado=RAM[Eseg[antUtilizado]]&0x0000FFFF;
                 do {
                     if(actUtilizado<min) {
                         min=actUtilizado;
@@ -406,13 +412,15 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                     }
                     antUtilizado=actUtilizado;
                     actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;
-                }while( antUtilizado!=REG[HP]&0x0000FFFF);
+                }while( antUtilizado!=(REG[HP]&0x0000FFFF));
 
                 if(RAM[Eseg[act]]>>16==REG[CX]){
+                    cargaHL(&RAM[Eseg[ant]],RAM[Eseg[ant]]>>16,RAM[Eseg[0]]&0xFFFF);
                     cargaHL(&REG[HP],RAM[Eseg[0]]&0x0000FFFF,0);
                     cargaHL(&RAM[Eseg[0]],REG[CX],min);
                     cargaHL(&RAM[Eseg[antMin]],RAM[Eseg[antMin]]>>16,0);
                 }else{
+                    cargaHL(&RAM[Eseg[ant]],RAM[Eseg[ant]]>>16,REG[CX]+1); //arma donde apunta siguiente nodo LIBRE
                     cargaHL(&REG[HP],REG[CX]+1,0);
                     cargaHL(&RAM[Eseg[ REG[CX]+1 ]],(RAM[Eseg[0]]>>16)-REG[CX]-1,RAM[Eseg[0]]&0x0000FFFF);
                     cargaHL(&RAM[Eseg[0]],REG[CX],min);
