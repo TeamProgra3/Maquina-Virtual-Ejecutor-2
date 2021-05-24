@@ -197,7 +197,7 @@ void RecuperaString(int cod, char salida[50]) {
             else if (tipoOp2 == 1){
                 if (op2 >=10 && op2 <= 15)
                     sprintf(aux2, ", %cX", op2 + 55);
-                else if (op2 == 9) 
+                else if (op2 == 9)
 
                     sprintf(aux2, ", AC");
                 else if (op2 == 6)
@@ -234,7 +234,7 @@ void RecuperaString(int cod, char salida[50]) {
         else if (tipoOp1 == 1){
             if (op1 >=10 && op1 <= 15)
                 sprintf(aux1, " %cX", op1 + 55);
-            else if (op1 == 9) 
+            else if (op1 == 9)
 
                 sprintf(aux1, " AC");
             else if (op1 == 6)
@@ -369,7 +369,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         RAM[DIR+i]=0; //\0 o 0?
         break;
     case 4: //(STRING WRITE)
-        while (RAM[DIR+i] != 0 && i < REG[CX]-1){
+        while (RAM[DIR+i] != 0){ //si se quiere trabajar con cx agregar: && i < REG[CX]
             if (!((REG[AX]>>11)&0xF))
                 printf("[%04i]:",DIR+i);
             printf("%c",RAM[DIR+i]);
@@ -441,7 +441,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                     if((RAM[Eseg[act]]&0x0000FFFF)==REG[HP]>>16){
                         cargaHL(&RAM[Eseg[antUtilizado]] , RAM[Eseg[antUtilizado]]>>16 ,act);//1�   nodo utilizados
                         cargaHL(&RAM[Eseg[act]]          , REG[CX]                     ,actUtilizado)   ;//2� nodo utilizados
-                        cargaHL(&RAM[Eseg[act+REG[CX]+1]],(REG[ES]>>16)-(act+REG[CX])-1,act+REG[CX] +1); //Cabecera de lo que sigue disponible 
+                        cargaHL(&RAM[Eseg[act+REG[CX]+1]],(REG[ES]>>16)-(act+REG[CX])-1,act+REG[CX] +1); //Cabecera de lo que sigue disponible
                         cargaHL(&REG[HP]              ,(REG[HP]>>16)+REG[CX]+1       ,act);
 
                     }else{
@@ -496,17 +496,17 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
             }
             if(actUtilizado+(RAM[Eseg[actUtilizado]]>>16) >= REG[DX]){
                 if (actUtilizado == RAM[Eseg[actUtilizado]]&0x0000FFFF){
-                    cargaHL(&REG[HP],actUtilizado,0xFFFFFFFF); 
+                    cargaHL(&REG[HP],actUtilizado,0xFFFFFFFF);
                 }  else {
-                    if(actUtilizado<(REG[HP]>>16)) //cambia disponibles 
+                    if(actUtilizado<(REG[HP]>>16)) //cambia disponibles
                         cargaHL(&REG[HP],actUtilizado,REG[HP]&0x0000FFFF);
                     if(actUtilizado==(REG[HP]&0x0000FFFF))//cambia utilizados
-                        cargaHL(&REG[HP],REG[HP]>>16,RAM[Eseg[actUtilizado]]&0x0000FFFF);     
-                }  
+                        cargaHL(&REG[HP],REG[HP]>>16,RAM[Eseg[actUtilizado]]&0x0000FFFF);
+                }
                 cargaHL(&RAM[Eseg[antUtilizado]],RAM[Eseg[antUtilizado]]>>16,RAM[Eseg[actUtilizado]]&0x0000FFFF);
                 cargaHL(&RAM[Eseg[actUtilizado]],RAM[Eseg[actUtilizado]]>>16,act);//ido :)
                 cargaHL(&RAM[Eseg[ant]],RAM[Eseg[ant]]>>16,actUtilizado);
-                
+
                 //compactacion:
                 int eliminado = actUtilizado;
                 ant=REG[HP]>>16;
@@ -522,13 +522,13 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                         act = RAM[Eseg[ant]] & 0xFFFF;
                         cargaHL(&RAM[Eseg[ant]],(RAM[Eseg[act]]>>16)+(RAM[Eseg[ant]]>>16)+1,RAM[Eseg[act]]&0x0000FFFF);
                     }                           //lo que viene despues + lo que ya traia el actual + 1
-                                            
+
                 }
             }
             else{
                 printf("Error en FREE, no puede eliminar la celda pedida [%d]", REG[DX]);
             }
-            
+
         }
         break;
     case 7:
