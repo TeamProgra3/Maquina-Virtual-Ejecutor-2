@@ -395,17 +395,28 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         }else{
             act=REG[HP]>>16;
             if(act==0){//inserto en la primer posicion y la lista no esta vacia
-                actUtilizado=REG[HP]&0x0000FFFF;
-                while(actUtilizado> (RAM[Eseg[act]]&0x0000FFFF)) 
+                int antMin=REG[HP]&0x0000FFFF;
+                int min=RAM[Eseg[antMin]]&0x0000FFFF;
+                antUtilizado=REG[HP]&0x0000FFFF;
+                actUtilizado=REG[Eseg[antUtilizado]]&0x0000FFFF;
+                do {
+                    if(actUtilizado<min) {
+                        min=actUtilizado;
+                        antMin=antUtilizado;
+                    }
+                    antUtilizado=actUtilizado;
                     actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;
-                //en este punto act<actU<act&0x0F;
+                }while( antUtilizado!=REG[HP]&0x0000FFFF);
+
                 if(RAM[Eseg[act]]>>16==REG[CX]){
-                    cargaHL(&REG[HP],RAM[Eseg[act]]&0x0000FFFF,act);
-                    cargaHL(&RAM[Eseg[act]],REG[CX],actUtilizado);
+                    cargaHL(&REG[HP],RAM[Eseg[0]]&0x0000FFFF,0);
+                    cargaHL(&RAM[Eseg[0]],REG[CX],min);
+                    cargaHL(&RAM[Eseg[antMin]],RAM[Eseg[antMin]]>>16,0);
                 }else{
-                    cargaHL(&RAM[Eseg[REG[CX]+1]],actUtilizado-(REG[CX]+1)-1,RAM[Eseg[act]]&0x0000FFFF);
-                    cargaHL(&RAM[Eseg[act]],REG[CX],actUtilizado);
-                    cargaHL(&REG[HP],REG[CX]+1,act);
+                    cargaHL(&REG[HP],REG[CX]+1,0);
+                    cargaHL(&RAM[Eseg[ REG[CX]+1 ]],(RAM[Eseg[0]]>>16)-REG[CX]-1,RAM[Eseg[0]]&0x0000FFFF);
+                    cargaHL(&RAM[Eseg[0]],REG[CX],min);
+                    cargaHL(&RAM[Eseg[antMin]],RAM[Eseg[antMin]]>>16,0);
                 }
             }else{//recorro
                 while((RAM[Eseg[act]]&0x0000FFFF)!=REG[HP]>>16 && (RAM[Eseg[act]]>>16) < REG[CX]){ //mientras NO este en el ultimo header Y el HPH tenga un tama�o menor al requerido
