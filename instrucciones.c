@@ -369,9 +369,9 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         RAM[DIR+i]=0; //\0 o 0?
         break;
     case 4: //(STRING WRITE)
-        while (RAM[DIR+i] != 0){ //si se quiere trabajar con cx agregar: && i < REG[CX]
-            if (!((REG[AX]>>11)&0xF))
+        if (!((REG[AX]>>11)&0xF))
                 printf("[%04i]:",DIR+i);
+        while (RAM[DIR+i] != 0){ //si se quiere trabajar con cx agregar: && i < REG[CX]
             printf("%c",RAM[DIR+i]);
             i++;
         }
