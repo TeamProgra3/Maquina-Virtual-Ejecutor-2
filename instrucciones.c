@@ -286,6 +286,7 @@ int anytoint(char *s, char **out) {
 void SYS(int *a,int *b,int REG[],int RAM[]) {
     int DSL,i=0,DXL,DXH,ESL,SSL,CSL,DIR;
     int ant,act,antUtilizado,actUtilizado;
+    int indireccion,segmento;
     char aux,c;
     int Eseg[ REG[ES]>>16 ];
     DSL = REG[DS] & 0xFFFF;
@@ -341,18 +342,19 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         }
         break;
     case 2:
-
+        segmento = (REG[DX] >> 16) & 0xFFFF;
+        indireccion = REG[segmento] & 0xFFFF;
         for( i=0; i<=REG[CX]-1; i++) {
             if (!((REG[AX]>>11)&0xF))            //veifica %800
-                printf("[%04i]:",DSL+DXL+i);
+                printf("[%04i]:",indireccion+DXL+i);
             if (REG[AX]&0x1)
-                printf("%i ",RAM[DSL+DXL+i]);
+                printf("%i ",RAM[indireccion+DXL+i]);
             if (REG[AX]&0x4)
-                printf("%o ",RAM[DSL+DXL+i]);
+                printf("%o ",RAM[indireccion+DXL+i]);
             if (REG[AX]&0x8)
-                printf("%x ",RAM[DSL+DXL+i]);
+                printf("%x ",RAM[indireccion+DXL+i]);
             if (REG[AX]&0x10)
-                printf("%c ",(char)RAM[DSL+DXL+i]);
+                printf("%c ",(char)RAM[indireccion+DXL+i]);
             if (!((REG[AX]>>8)&0x1))
                 printf("\n");
         }
