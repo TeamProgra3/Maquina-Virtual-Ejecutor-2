@@ -488,7 +488,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
             ant=REG[HP]>>16;
             act=RAM[Eseg[ant]]&0x0000FFFF;
             //Mientras no esta en el "ultimo" nodo de HPL && no me de el rango
-            while( (RAM[Eseg[actUtilizado]]&0x0000FFFF)!=REG[HP]&0x0000FFFF  && actUtilizado+(RAM[Eseg[actUtilizado]]>>16) < REG[DX]){
+            while(((RAM[Eseg[actUtilizado]]&0x0000FFFF)!=REG[HP]&0x0000FFFF)  && (actUtilizado+(RAM[Eseg[actUtilizado]]>>16) < REG[DX])){
                 antUtilizado=actUtilizado;
                 actUtilizado=RAM[Eseg[actUtilizado]]&0x0000FFFF;
             }
@@ -497,7 +497,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                 act=RAM[Eseg[act]]&0x0000FFFF;
             }
             if(actUtilizado+(RAM[Eseg[actUtilizado]]>>16) >= REG[DX]){
-                if (actUtilizado == RAM[Eseg[actUtilizado]]&0x0000FFFF){
+                if (actUtilizado == (RAM[Eseg[actUtilizado]]&0x0000FFFF)){
                     cargaHL(&REG[HP],actUtilizado,0xFFFFFFFF);
                 }  else {
                     if(actUtilizado<(REG[HP]>>16)) //cambia disponibles
@@ -514,7 +514,7 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                 ant=REG[HP]>>16;
                 act=RAM[Eseg[ant]]&0x0000FFFF;
 
-                while(RAM[Eseg[act]]&0x0000FFFF!=(REG[HP]>>16) && !(((ant + 1+(RAM[Eseg[ant]]>>16)) == (RAM[Eseg[ant]]&0x0000FFFF))) ){
+                while(((RAM[Eseg[act]]&0x0000FFFF)!=(REG[HP]>>16)) && !(((ant + 1+(RAM[Eseg[ant]]>>16)) == (RAM[Eseg[ant]]&0x0000FFFF))) ){
                     ant=act;
                     act=RAM[Eseg[act]]&0x0000FFFF;
                 }
