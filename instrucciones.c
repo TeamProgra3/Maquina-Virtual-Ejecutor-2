@@ -250,7 +250,7 @@ void RecuperaString(int cod, char salida[50]) {
                 offset >>= 24;
                 registro = op1 & 0xF;
                 if (registro >= 10 && registro <=15)
-                    sprintf(aux1, " [%cX", op2 + 55);
+                    sprintf(aux1, " [%cX", op1 + 55);
                 else if ( registro == 7)
                     sprintf(aux1, " [BP");
                 else if ( registro == 6)
