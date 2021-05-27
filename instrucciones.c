@@ -300,10 +300,10 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
         DIR = DXL + DSL;
     break;
     case 1:
-        DIR = DXL + ESL;
+        DIR = DXL + SSL;
     break;
     case 2:
-        DIR = DXL + SSL;
+        DIR = DXL + ESL;
     break;
     case 3:
         DIR = DXL + CSL;
@@ -313,12 +313,14 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
     switch(*a) {
     case 1:
        //arranco en DX+SD (segmento de datos)
+        segmento = (REG[DX] >> 16) & 0xFFFF;
+        indireccion = REG[segmento] & 0xFFFF;
         if (((REG[AX]>>8) &0x1 ) == 0x1){
             if (!((REG[AX]>>11) == 0x1))
                 printf("\n[%04i]:",DXL+i);
         scanf(" %c",&aux);
         while (aux != '\n'){
-            RAM[DSL+DXL+i] = aux;
+            RAM[indireccion+DXL+i] = aux;
             scanf("%c",&aux);
             i++;
         }
@@ -328,13 +330,13 @@ void SYS(int *a,int *b,int REG[],int RAM[]) {
                     printf("\n[%04i]:",DXL+i);
                 switch(REG[AX]&0xF){            //La operacion depende del valor en AX
                 case(0x1):
-                    scanf("%i",&RAM[DSL+DXL+i]);
+                    scanf("%i",&RAM[indireccion+DXL+i]);
                     break;
                 case(0x4):
-                    scanf("%o",&RAM[DSL+DXL+i]);
+                    scanf("%o",&RAM[indireccion+DXL+i]);
                     break;
                 case(0x8):
-                    scanf("%x",&RAM[DSL+DXL+i]);
+                    scanf("%x",&RAM[indireccion+DXL+i]);
                     break;
                 }
             }
