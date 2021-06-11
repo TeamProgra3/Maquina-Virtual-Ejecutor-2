@@ -30,7 +30,7 @@ void traduce(int var, int** opA, int** opB, int RAM[], int REG[], int* error) {
 
                 case 0x2:  //TIPO DIRECTO - UN SOLO OPERANDO
                     **opA = var & 0xFFFF;
-                    DSL = REG[DS] & 0xFF;
+                    DSL = REG[DS] & 0xFFFF;
                     *opA = &RAM[DSL + **opA];
                     break;
                 case 0x3:  //Indirecto
@@ -95,7 +95,7 @@ void traduce(int var, int** opA, int** opB, int RAM[], int REG[], int* error) {
 
                 case 0x2:  //opA: TIPO DIRECTO
                     **opA = (var >> 12) & 0x00FFF;
-                    DSL = REG[DS] & 0xFF;
+                    DSL = REG[DS] & 0xFFFF;
                     *opA = &RAM[DSL + **opA];
                     break;
                 case 0x3:  //Indirecto
@@ -158,7 +158,7 @@ void traduce(int var, int** opA, int** opB, int RAM[], int REG[], int* error) {
 
                 case 0x2:  //opB: TIPO INMEDIATO
                     **opB = var & 0xFFF;
-                    DSL = REG[DS] & 0xFF;
+                    DSL = REG[DS] & 0xFFFF;
                     *opB = &RAM[DSL + **opB];
                     break;
                 case 0x3:  //Indirecto
